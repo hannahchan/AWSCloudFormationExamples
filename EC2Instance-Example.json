@@ -1,0 +1,234 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "An EC2 Instance.",
+    "Parameters": {
+        "ImageId": {
+            "Type": "AWS::EC2::Image::Id",
+            "Description": "The Amazon Machine Image (AMI) to use for the EC2 Instance."
+        },
+        "InstanceType": {
+            "Type": "String",
+            "Default": "t2.micro",
+            "Description": "The EC2 Instance Type to launch the EC2 Instance as."
+        },
+        "KeyName": {
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "Description": "The name of the Amazon EC2 Key Pair to use."
+        },
+        "SubnetId": {
+            "Type": "AWS::EC2::Subnet::Id",
+            "Description": "The subnet to create the EC2 Instance in."
+        },
+        "VpcId": {
+            "Type": "AWS::EC2::VPC::Id",
+            "Description": "The VPC to create the EC2 Instance in."
+        },
+        "IncludeEIP": {
+            "Type": "String",
+            "AllowedValues": [
+                true,
+                false
+            ],
+            "Default": true,
+            "Description": "Assign an Elastic IP to the EC2 Instance."
+        },
+        "EnableIngressRuleSSH": {
+            "Type": "String",
+            "AllowedValues": [
+                true,
+                false
+            ],
+            "Default": false,
+            "Description": "Add SSH (Port 22) ingress rule to the EC2 Instance Security Group."
+        },
+        "EnableIngressRuleRDP": {
+            "Type": "String",
+            "AllowedValues": [
+                true,
+                false
+            ],
+            "Default": false,
+            "Description": "Add RDP (Port 3389) ingress rule to the EC2 Instance Security Group."
+        },
+        "EnableIngressRuleWinRM": {
+            "Type": "String",
+            "AllowedValues": [
+                true,
+                false
+            ],
+            "Default": false,
+            "Description": "Add WinRM-HTTP (Port 5985) ingress rule to the EC2 Instance Security Group."
+        }
+    },
+    "Conditions": {
+        "CreateEIP": {
+            "Fn::Equals": [
+                {
+                    "Ref": "IncludeEIP"
+                },
+                true
+            ]
+        },
+        "CreateIngressRuleSSH": {
+            "Fn::Equals": [
+                {
+                    "Ref": "EnableIngressRuleSSH"
+                },
+                true
+            ]
+        },
+        "CreateIngressRuleRDP": {
+            "Fn::Equals": [
+                {
+                    "Ref": "EnableIngressRuleRDP"
+                },
+                true
+            ]
+        },
+        "CreateIngressRuleWinRM": {
+            "Fn::Equals": [
+                {
+                    "Ref": "EnableIngressRuleWinRM"
+                },
+                true
+            ]
+        }
+    },
+    "Resources": {
+        "EC2Instance": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "ImageId": {
+                    "Ref": "ImageId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "SecurityGroupIds": [
+                    {
+                        "Ref": "SecurityGroup"
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "SubnetId"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ]
+            }
+        },
+        "EC2InstanceEIP": {
+            "Condition": "CreateEIP",
+            "Type": "AWS::EC2::EIP",
+            "Properties": {}
+        },
+        "EC2InstanceEIPAssociation": {
+            "Condition": "CreateEIP",
+            "Type": "AWS::EC2::EIPAssociation",
+            "Properties": {
+                "AllocationId": {
+                    "Fn::GetAtt": [
+                        "EC2InstanceEIP",
+                        "AllocationId"
+                    ]
+                },
+                "InstanceId": {
+                    "Ref": "EC2Instance"
+                }
+            }
+        },
+        "SecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupName": {
+                    "Ref": "AWS::StackName"
+                },
+                "GroupDescription": {
+                    "Fn::Sub": "Security Group for EC2 Instance: ${AWS::StackName}"
+                },
+                "VpcId": {
+                    "Ref": "VpcId"
+                }
+            }
+        },
+        "IngressRuleSSH": {
+            "Condition": "CreateIngressRuleSSH",
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "SecurityGroup",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "FromPort": 22,
+                "ToPort": 22,
+                "CidrIp": "0.0.0.0/0"
+            }
+        },
+        "IngressRuleRDP": {
+            "Condition": "CreateIngressRuleRDP",
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "SecurityGroup",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "FromPort": 3389,
+                "ToPort": 3389,
+                "CidrIp": "0.0.0.0/0"
+            }
+        },
+        "IngressRuleWinRM": {
+            "Condition": "CreateIngressRuleWinRM",
+            "Type": "AWS::EC2::SecurityGroupIngress",
+            "Properties": {
+                "GroupId": {
+                    "Fn::GetAtt": [
+                        "SecurityGroup",
+                        "GroupId"
+                    ]
+                },
+                "IpProtocol": "tcp",
+                "FromPort": 5985,
+                "ToPort": 5985,
+                "CidrIp": "0.0.0.0/0"
+            }
+        }
+    },
+    "Outputs": {
+        "Id": {
+            "Value": {
+                "Ref": "EC2Instance"
+            }
+        },
+        "PrivateDnsName": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "EC2Instance",
+                    "PrivateDnsName"
+                ]
+            }
+        },
+        "PublicDnsName": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "EC2Instance",
+                    "PublicDnsName"
+                ]
+            }
+        }
+    }
+}

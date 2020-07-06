@@ -1,0 +1,254 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "A VPC with 3 subnet.",
+    "Parameters": {
+        "AvailabilityZoneA": {
+            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "Description": "The Availability Zone for the Subnet A."
+        },
+        "AvailabilityZoneB": {
+            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "Description": "The Availability Zone for the Subnet B."
+        },
+        "AvailabilityZoneC": {
+            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "Description": "The Availability Zone for the Subnet C."
+        },
+        "VpcCidrBlock": {
+            "Type": "String",
+            "Default": "192.168.0.0/16",
+            "Description": "The IPv4 CIDR block to be used for the VPC."
+        },
+        "SubnetACidrBlock": {
+            "Type": "String",
+            "Default": "192.168.0.0/24",
+            "Description": "The IPv4 CIDR block to be used for Subnet A."
+        },
+        "SubnetBCidrBlock": {
+            "Type": "String",
+            "Default": "192.168.1.0/24",
+            "Description": "The IPv4 CIDR block to be used for Subnet B."
+        },
+        "SubnetCCidrBlock": {
+            "Type": "String",
+            "Default": "192.168.2.0/24",
+            "Description": "The IPv4 CIDR block to be used for Subnet C."
+        },
+        "MapPublicIpOnLaunch": {
+            "Type": "String",
+            "AllowedValues": [
+                true,
+                false
+            ],
+            "Default": false,
+            "Description": "Whether public IP addresses are assigned when EC2 Instances are launched."
+        }
+    },
+    "Resources": {
+        "Vpc": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": {
+                    "Ref": "VpcCidrBlock"
+                },
+                "EnableDnsSupport": true,
+                "EnableDnsHostnames": true,
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ]
+            }
+        },
+        "SubnetA": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Ref": "AvailabilityZoneA"
+                },
+                "CidrBlock": {
+                    "Ref": "SubnetACidrBlock"
+                },
+                "MapPublicIpOnLaunch": {
+                    "Ref": "MapPublicIpOnLaunch"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": "${AWS::StackName}"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            }
+        },
+        "SubnetB": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Ref": "AvailabilityZoneB"
+                },
+                "CidrBlock": {
+                    "Ref": "SubnetBCidrBlock"
+                },
+                "MapPublicIpOnLaunch": {
+                    "Ref": "MapPublicIpOnLaunch"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": "${AWS::StackName}"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            }
+        },
+        "SubnetC": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Ref": "AvailabilityZoneC"
+                },
+                "CidrBlock": {
+                    "Ref": "SubnetCCidrBlock"
+                },
+                "MapPublicIpOnLaunch": {
+                    "Ref": "MapPublicIpOnLaunch"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Sub": "${AWS::StackName}"
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            }
+        },
+        "InternetGateway": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {}
+        },
+        "InternetGatewayAttachment": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "Properties": {
+                "InternetGatewayId": {
+                    "Ref": "InternetGateway"
+                },
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            }
+        },
+        "RouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            }
+        },
+        "InternetGatewayRoute": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "RouteTable"
+                },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "InternetGateway"
+                }
+            }
+        },
+        "SubnetARouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "RouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "SubnetA"
+                }
+            }
+        },
+        "SubnetBRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "RouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "SubnetB"
+                }
+            }
+        },
+        "SubnetCRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "RouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "SubnetC"
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "Id": {
+            "Description": "The resource ID of the VPC.",
+            "Value": {
+                "Ref": "Vpc"
+            }
+        },
+        "DefaultNetworkAcl": {
+            "Description": "The default Network ACL ID of the VPC.",
+            "Value": {
+                "Fn::GetAtt": [
+                    "Vpc",
+                    "DefaultNetworkAcl"
+                ]
+            }
+        },
+        "DefaultSecurityGroup": {
+            "Description": "The default Security Group ID of the VPC.",
+            "Value": {
+                "Fn::GetAtt": [
+                    "Vpc",
+                    "DefaultSecurityGroup"
+                ]
+            }
+        },
+        "SubnetAId": {
+            "Description": "The resource ID of the Subnet A.",
+            "Value": {
+                "Ref": "SubnetA"
+            }
+        },
+        "SubnetBId": {
+            "Description": "The resource ID of the Subnet B.",
+            "Value": {
+                "Ref": "SubnetB"
+            }
+        },
+        "SubnetCId": {
+            "Description": "The resource ID of the Subnet C.",
+            "Value": {
+                "Ref": "SubnetC"
+            }
+        }
+    }
+}
