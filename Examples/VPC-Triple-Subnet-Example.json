@@ -1,38 +1,76 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "A VPC with 3 subnet.",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Parameters": [
+                        "VpcCidrBlock",
+                        "MapPublicIpOnLaunch"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Subnet 1"
+                    },
+                    "Parameters": [
+                        "AvailabilityZone1",
+                        "Subnet1CidrBlock"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Subnet 2"
+                    },
+                    "Parameters": [
+                        "AvailabilityZone2",
+                        "Subnet2CidrBlock"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Subnet 3"
+                    },
+                    "Parameters": [
+                        "AvailabilityZone3",
+                        "Subnet3CidrBlock"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "VpcCidrBlock": {
+                    "default": "VPC IPv4 CIDR Block"
+                },
+                "MapPublicIpOnLaunch": {
+                    "default": "Map Public IP On Launch"
+                },
+                "AvailabilityZone1": {
+                    "default": "Availability Zone"
+                },
+                "AvailabilityZone2": {
+                    "default": "Availability Zone"
+                },
+                "AvailabilityZone3": {
+                    "default": "Availability Zone"
+                },
+                "Subnet1CidrBlock": {
+                    "default": "Subnet IPv4 CIDR Block"
+                },
+                "Subnet2CidrBlock": {
+                    "default": "Subnet IPv4 CIDR Block"
+                },
+                "Subnet3CidrBlock": {
+                    "default": "Subnet IPv4 CIDR Block"
+                }
+            }
+        }
+    },
     "Parameters": {
-        "AvailabilityZoneA": {
-            "Type": "AWS::EC2::AvailabilityZone::Name",
-            "Description": "The Availability Zone for the Subnet A."
-        },
-        "AvailabilityZoneB": {
-            "Type": "AWS::EC2::AvailabilityZone::Name",
-            "Description": "The Availability Zone for the Subnet B."
-        },
-        "AvailabilityZoneC": {
-            "Type": "AWS::EC2::AvailabilityZone::Name",
-            "Description": "The Availability Zone for the Subnet C."
-        },
         "VpcCidrBlock": {
             "Type": "String",
             "Default": "192.168.0.0/16",
             "Description": "The IPv4 CIDR block to be used for the VPC."
-        },
-        "SubnetACidrBlock": {
-            "Type": "String",
-            "Default": "192.168.0.0/24",
-            "Description": "The IPv4 CIDR block to be used for Subnet A."
-        },
-        "SubnetBCidrBlock": {
-            "Type": "String",
-            "Default": "192.168.1.0/24",
-            "Description": "The IPv4 CIDR block to be used for Subnet B."
-        },
-        "SubnetCCidrBlock": {
-            "Type": "String",
-            "Default": "192.168.2.0/24",
-            "Description": "The IPv4 CIDR block to be used for Subnet C."
         },
         "MapPublicIpOnLaunch": {
             "Type": "String",
@@ -42,6 +80,33 @@
             ],
             "Default": false,
             "Description": "Whether public IP addresses are assigned when EC2 Instances are launched."
+        },
+        "AvailabilityZone1": {
+            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "Description": "The Availability Zone for the Subnet 1."
+        },
+        "AvailabilityZone2": {
+            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "Description": "The Availability Zone for the Subnet 2."
+        },
+        "AvailabilityZone3": {
+            "Type": "AWS::EC2::AvailabilityZone::Name",
+            "Description": "The Availability Zone for the Subnet 3."
+        },
+        "Subnet1CidrBlock": {
+            "Type": "String",
+            "Default": "192.168.0.0/24",
+            "Description": "The IPv4 CIDR block to be used for Subnet 1."
+        },
+        "Subnet2CidrBlock": {
+            "Type": "String",
+            "Default": "192.168.1.0/24",
+            "Description": "The IPv4 CIDR block to be used for Subnet 2."
+        },
+        "Subnet3CidrBlock": {
+            "Type": "String",
+            "Default": "192.168.2.0/24",
+            "Description": "The IPv4 CIDR block to be used for Subnet 3."
         }
     },
     "Resources": {
@@ -63,81 +128,6 @@
                 ]
             }
         },
-        "SubnetA": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "AvailabilityZone": {
-                    "Ref": "AvailabilityZoneA"
-                },
-                "CidrBlock": {
-                    "Ref": "SubnetACidrBlock"
-                },
-                "MapPublicIpOnLaunch": {
-                    "Ref": "MapPublicIpOnLaunch"
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName}"
-                        }
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "Vpc"
-                }
-            }
-        },
-        "SubnetB": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "AvailabilityZone": {
-                    "Ref": "AvailabilityZoneB"
-                },
-                "CidrBlock": {
-                    "Ref": "SubnetBCidrBlock"
-                },
-                "MapPublicIpOnLaunch": {
-                    "Ref": "MapPublicIpOnLaunch"
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName}"
-                        }
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "Vpc"
-                }
-            }
-        },
-        "SubnetC": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "AvailabilityZone": {
-                    "Ref": "AvailabilityZoneC"
-                },
-                "CidrBlock": {
-                    "Ref": "SubnetCCidrBlock"
-                },
-                "MapPublicIpOnLaunch": {
-                    "Ref": "MapPublicIpOnLaunch"
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName}"
-                        }
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "Vpc"
-                }
-            }
-        },
         "InternetGateway": {
             "Type": "AWS::EC2::InternetGateway",
             "Properties": {}
@@ -148,6 +138,105 @@
                 "InternetGatewayId": {
                     "Ref": "InternetGateway"
                 },
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            }
+        },
+        "Subnet1": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Ref": "AvailabilityZone1"
+                },
+                "CidrBlock": {
+                    "Ref": "Subnet1CidrBlock"
+                },
+                "MapPublicIpOnLaunch": {
+                    "Ref": "MapPublicIpOnLaunch"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                " - ",
+                                [
+                                    {
+                                        "Fn::Sub": "${AWS::StackName}"
+                                    },
+                                    "Subnet 1"
+                                ]
+                            ]
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            }
+        },
+        "Subnet2": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Ref": "AvailabilityZone2"
+                },
+                "CidrBlock": {
+                    "Ref": "Subnet2CidrBlock"
+                },
+                "MapPublicIpOnLaunch": {
+                    "Ref": "MapPublicIpOnLaunch"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                " - ",
+                                [
+                                    {
+                                        "Fn::Sub": "${AWS::StackName}"
+                                    },
+                                    "Subnet 2"
+                                ]
+                            ]
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            }
+        },
+        "Subnet3": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Ref": "AvailabilityZone3"
+                },
+                "CidrBlock": {
+                    "Ref": "Subnet3CidrBlock"
+                },
+                "MapPublicIpOnLaunch": {
+                    "Ref": "MapPublicIpOnLaunch"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                " - ",
+                                [
+                                    {
+                                        "Fn::Sub": "${AWS::StackName}"
+                                    },
+                                    "Subnet 3"
+                                ]
+                            ]
+                        }
+                    }
+                ],
                 "VpcId": {
                     "Ref": "Vpc"
                 }
@@ -180,7 +269,7 @@
                     "Ref": "RouteTable"
                 },
                 "SubnetId": {
-                    "Ref": "SubnetA"
+                    "Ref": "Subnet1"
                 }
             }
         },
@@ -191,7 +280,7 @@
                     "Ref": "RouteTable"
                 },
                 "SubnetId": {
-                    "Ref": "SubnetB"
+                    "Ref": "Subnet2"
                 }
             }
         },
@@ -202,7 +291,7 @@
                     "Ref": "RouteTable"
                 },
                 "SubnetId": {
-                    "Ref": "SubnetC"
+                    "Ref": "Subnet3"
                 }
             }
         }
@@ -233,21 +322,21 @@
             }
         },
         "SubnetAId": {
-            "Description": "The resource ID of the Subnet A.",
+            "Description": "The resource ID of the Subnet 1.",
             "Value": {
-                "Ref": "SubnetA"
+                "Ref": "Subnet1"
             }
         },
         "SubnetBId": {
-            "Description": "The resource ID of the Subnet B.",
+            "Description": "The resource ID of the Subnet 2.",
             "Value": {
-                "Ref": "SubnetB"
+                "Ref": "Subnet2"
             }
         },
         "SubnetCId": {
-            "Description": "The resource ID of the Subnet C.",
+            "Description": "The resource ID of the Subnet 3.",
             "Value": {
-                "Ref": "SubnetC"
+                "Ref": "Subnet3"
             }
         }
     }

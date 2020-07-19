@@ -1,6 +1,71 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "An EC2 Instance.",
+    "Description": "An EC2 Instance with its own Security Group.",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Instance Configuration"
+                    },
+                    "Parameters": [
+                        "ImageId",
+                        "InstanceType",
+                        "KeyName"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Network Configuration"
+                    },
+                    "Parameters": [
+                        "VpcId",
+                        "SubnetId",
+                        "IncludeEIP"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Security Group Configuration"
+                    },
+                    "Parameters": [
+                        "EnableIngressRuleSSH",
+                        "EnableIngressRuleRDP",
+                        "EnableIngressRuleWinRM"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "ImageId": {
+                    "default": "Image ID"
+                },
+                "InstanceType": {
+                    "default": "Instance Type"
+                },
+                "KeyName": {
+                    "default": "Key Name"
+                },
+                "VpcId": {
+                    "default": "VPC"
+                },
+                "SubnetId": {
+                    "default": "Subnet"
+                },
+                "IncludeEIP": {
+                    "default": "Include Elastic IP"
+                },
+                "EnableIngressRuleSSH": {
+                    "default": "Enable Ingress Rule for SSH"
+                },
+                "EnableIngressRuleRDP": {
+                    "default": "Enable Ingress Rule for RDP"
+                },
+                "EnableIngressRuleWinRM": {
+                    "default": "Enable Ingress Rule for WinRM"
+                }
+            }
+        }
+    },
     "Parameters": {
         "ImageId": {
             "Type": "AWS::EC2::Image::Id",
@@ -15,13 +80,13 @@
             "Type": "AWS::EC2::KeyPair::KeyName",
             "Description": "The name of the Amazon EC2 Key Pair to use."
         },
-        "SubnetId": {
-            "Type": "AWS::EC2::Subnet::Id",
-            "Description": "The subnet to create the EC2 Instance in."
-        },
         "VpcId": {
             "Type": "AWS::EC2::VPC::Id",
             "Description": "The VPC to create the EC2 Instance in."
+        },
+        "SubnetId": {
+            "Type": "AWS::EC2::Subnet::Id",
+            "Description": "The subnet to create the EC2 Instance in."
         },
         "IncludeEIP": {
             "Type": "String",

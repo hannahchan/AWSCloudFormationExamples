@@ -1,6 +1,30 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "A VPC with 1 subnet.",
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Parameters": [
+                        "AvailabilityZone",
+                        "CidrBlock",
+                        "MapPublicIpOnLaunch"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "AvailabilityZone": {
+                    "default": "Availability Zone"
+                },
+                "CidrBlock": {
+                    "default": "IPv4 CIDR Block"
+                },
+                "MapPublicIpOnLaunch": {
+                    "default": "Map Public IP On Launch"
+                }
+            }
+        }
+    },
     "Parameters": {
         "AvailabilityZone": {
             "Type": "AWS::EC2::AvailabilityZone::Name",
