@@ -21,7 +21,7 @@
                     "Parameters": [
                         "VpcId",
                         "SubnetId",
-                        "IncludeEIP"
+                        "IncludeElasticIp"
                     ]
                 },
                 {
@@ -29,6 +29,7 @@
                         "default": "Security Group Configuration"
                     },
                     "Parameters": [
+                        "IngressSourceCidrBlock",
                         "EnableIngressRuleSSH",
                         "EnableIngressRuleRDP",
                         "EnableIngressRuleWinRM"
@@ -51,8 +52,11 @@
                 "SubnetId": {
                     "default": "Subnet"
                 },
-                "IncludeEIP": {
+                "IncludeElasticIp": {
                     "default": "Include Elastic IP"
+                },
+                "IngressSourceCidrBlock": {
+                    "default": "Ingress Source"
                 },
                 "EnableIngressRuleSSH": {
                     "default": "Enable Ingress Rule for SSH"
@@ -88,7 +92,7 @@
             "Type": "AWS::EC2::Subnet::Id",
             "Description": "The subnet to create the EC2 Instance in."
         },
-        "IncludeEIP": {
+        "IncludeElasticIp": {
             "Type": "String",
             "AllowedValues": [
                 true,
@@ -96,6 +100,11 @@
             ],
             "Default": true,
             "Description": "Assign an Elastic IP to the EC2 Instance."
+        },
+        "IngressSourceCidrBlock": {
+            "Type": "String",
+            "Default": "0.0.0.0/0",
+            "Description": "The IPv4 CIDR block to allow incoming connection from."
         },
         "EnableIngressRuleSSH": {
             "Type": "String",
@@ -126,10 +135,10 @@
         }
     },
     "Conditions": {
-        "CreateEIP": {
+        "CreateElasticIp": {
             "Fn::Equals": [
                 {
-                    "Ref": "IncludeEIP"
+                    "Ref": "IncludeElasticIp"
                 },
                 true
             ]
@@ -190,18 +199,17 @@
                 ]
             }
         },
-        "EC2InstanceEIP": {
-            "Condition": "CreateEIP",
-            "Type": "AWS::EC2::EIP",
-            "Properties": {}
+        "EC2InstanceElasticIp": {
+            "Condition": "CreateElasticIp",
+            "Type": "AWS::EC2::EIP"
         },
-        "EC2InstanceEIPAssociation": {
-            "Condition": "CreateEIP",
+        "EC2InstanceElasticIpAssociation": {
+            "Condition": "CreateElasticIp",
             "Type": "AWS::EC2::EIPAssociation",
             "Properties": {
                 "AllocationId": {
                     "Fn::GetAtt": [
-                        "EC2InstanceEIP",
+                        "EC2InstanceElasticIp",
                         "AllocationId"
                     ]
                 },
@@ -219,6 +227,14 @@
                 "GroupDescription": {
                     "Fn::Sub": "Security Group for EC2 Instance: ${AWS::StackName}"
                 },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Ref": "AWS::StackName"
+                        }
+                    }
+                ],
                 "VpcId": {
                     "Ref": "VpcId"
                 }
@@ -237,7 +253,9 @@
                 "IpProtocol": "tcp",
                 "FromPort": 22,
                 "ToPort": 22,
-                "CidrIp": "0.0.0.0/0"
+                "CidrIp": {
+                    "Ref": "IngressSourceCidrBlock"
+                }
             }
         },
         "IngressRuleRDP": {
@@ -253,7 +271,9 @@
                 "IpProtocol": "tcp",
                 "FromPort": 3389,
                 "ToPort": 3389,
-                "CidrIp": "0.0.0.0/0"
+                "CidrIp": {
+                    "Ref": "IngressSourceCidrBlock"
+                }
             }
         },
         "IngressRuleWinRM": {
@@ -269,7 +289,9 @@
                 "IpProtocol": "tcp",
                 "FromPort": 5985,
                 "ToPort": 5985,
-                "CidrIp": "0.0.0.0/0"
+                "CidrIp": {
+                    "Ref": "IngressSourceCidrBlock"
+                }
             }
         }
     },
