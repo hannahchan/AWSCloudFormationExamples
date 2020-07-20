@@ -1,16 +1,43 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "A VPC with a public and private subnet in a single availability zone.",
+    "Description": "A VPC with a public, private and optional data subnet in a single availability zone.",
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
                 {
+                    "Label": {
+                        "default": "General Configuration"
+                    },
                     "Parameters": [
                         "AvailabilityZone",
-                        "VpcCidrBlock",
+                        "VpcCidrBlock"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Public Subnet Configuration"
+                    },
+                    "Parameters": [
                         "PublicSubnetCidrBlock",
+                        "MapPublicIpOnLaunch"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Private Subnet Configuration"
+                    },
+                    "Parameters": [
                         "PrivateSubnetCidrBlock",
                         "IncludeNat"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Data Subnet Configuration"
+                    },
+                    "Parameters": [
+                        "IncludeDataSubnet",
+                        "DataSubnetCidrBlock"
                     ]
                 }
             ],
@@ -24,11 +51,20 @@
                 "PublicSubnetCidrBlock": {
                     "default": "Public Subnet IPv4 CIDR Block"
                 },
+                "MapPublicIpOnLaunch": {
+                    "default": "Map Public IP On Launch"
+                },
                 "PrivateSubnetCidrBlock": {
                     "default": "Private Subnet IPv4 CIDR Block"
                 },
                 "IncludeNat": {
                     "default": "Include NAT Gateway"
+                },
+                "IncludeDataSubnet": {
+                    "default": "Include Data Subnet"
+                },
+                "DataSubnetCidrBlock": {
+                    "default": "Data Subnet IPv4 CIDR Block"
                 }
             }
         }
@@ -36,7 +72,7 @@
     "Parameters": {
         "AvailabilityZone": {
             "Type": "AWS::EC2::AvailabilityZone::Name",
-            "Description": "The Availability Zone for the public and private subnet."
+            "Description": "The Availability Zone for the public, private and optional data subnet."
         },
         "VpcCidrBlock": {
             "Type": "String",
@@ -47,6 +83,15 @@
             "Type": "String",
             "Default": "192.168.0.0/24",
             "Description": "The IPv4 CIDR block to be used for the public subnet."
+        },
+        "MapPublicIpOnLaunch": {
+            "Type": "String",
+            "AllowedValues": [
+                true,
+                false
+            ],
+            "Default": false,
+            "Description": "Whether public IP addresses are assigned when EC2 Instances are launched in the public subnet."
         },
         "PrivateSubnetCidrBlock": {
             "Type": "String",
@@ -60,7 +105,21 @@
                 "true",
                 "false"
             ],
-            "Description": "Includes a NAT gateway if set to 'true'."
+            "Description": "Creates a NAT gateway if set to 'true'. Allows instances in the private subnet to access the internet."
+        },
+        "IncludeDataSubnet": {
+            "Type": "String",
+            "Default": "false",
+            "AllowedValues": [
+                "true",
+                "false"
+            ],
+            "Description": "Creates a data subnet if set to 'true'."
+        },
+        "DataSubnetCidrBlock": {
+            "Type": "String",
+            "Default": "192.168.2.0/24",
+            "Description": "The IPv4 CIDR block to be used for the data subnet."
         }
     },
     "Conditions": {
@@ -68,6 +127,14 @@
             "Fn::Equals": [
                 {
                     "Ref": "IncludeNat"
+                },
+                "true"
+            ]
+        },
+        "CreateDataSubnet": {
+            "Fn::Equals": [
+                {
+                    "Ref": "IncludeDataSubnet"
                 },
                 "true"
             ]
@@ -115,6 +182,9 @@
                 },
                 "CidrBlock": {
                     "Ref": "PublicSubnetCidrBlock"
+                },
+                "MapPublicIpOnLaunch": {
+                    "Ref": "MapPublicIpOnLaunch"
                 },
                 "Tags": [
                     {
@@ -280,10 +350,78 @@
                     "Ref": "NatGateway"
                 }
             }
+        },
+        "DataSubnet": {
+            "Type": "AWS::EC2::Subnet",
+            "Condition": "CreateDataSubnet",
+            "Properties": {
+                "AvailabilityZone": {
+                    "Ref": "AvailabilityZone"
+                },
+                "CidrBlock": {
+                    "Ref": "DataSubnetCidrBlock"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                " - ",
+                                [
+                                    {
+                                        "Fn::Sub": "${AWS::StackName}"
+                                    },
+                                    "Data Subnet"
+                                ]
+                            ]
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            }
+        },
+        "DataSubnetRouteTable": {
+            "Type": "AWS::EC2::RouteTable",
+            "Condition": "CreateDataSubnet",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                " - ",
+                                [
+                                    {
+                                        "Fn::Sub": "${AWS::StackName}"
+                                    },
+                                    "Data Subnet Route Table"
+                                ]
+                            ]
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "Vpc"
+                }
+            }
+        },
+        "DataSubnetRouteTableAssociation": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Condition": "CreateDataSubnet",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "DataSubnetRouteTable"
+                },
+                "SubnetId": {
+                    "Ref": "DataSubnet"
+                }
+            }
         }
     },
     "Outputs": {
-        "Id": {
+        "Vpc": {
             "Description": "The resource ID of the VPC.",
             "Value": {
                 "Ref": "Vpc"
@@ -307,16 +445,23 @@
                 ]
             }
         },
-        "PublicSubnetId": {
+        "PublicSubnet": {
             "Description": "The resource ID of the public subnet.",
             "Value": {
                 "Ref": "PublicSubnet"
             }
         },
-        "PrivateSubnetId": {
+        "PrivateSubnet": {
             "Description": "The resource ID of the private subnet.",
             "Value": {
                 "Ref": "PrivateSubnet"
+            }
+        },
+        "DataSubnet": {
+            "Condition": "CreateDataSubnet",
+            "Description": "The resource ID of the data subnet.",
+            "Value": {
+                "Ref": "DataSubnet"
             }
         }
     }

@@ -137,7 +137,7 @@
         }
     },
     "Outputs": {
-        "Id": {
+        "Vpc": {
             "Description": "The resource ID of the VPC.",
             "Value": {
                 "Ref": "Vpc"
@@ -161,7 +161,7 @@
                 ]
             }
         },
-        "SubnetId": {
+        "Subnet": {
             "Description": "The resource ID of the subnet.",
             "Value": {
                 "Ref": "Subnet"

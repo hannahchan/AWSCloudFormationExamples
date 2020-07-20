@@ -262,7 +262,7 @@
                 }
             }
         },
-        "SubnetARouteTableAssociation": {
+        "Subnet1RouteTableAssociation": {
             "Type": "AWS::EC2::SubnetRouteTableAssociation",
             "Properties": {
                 "RouteTableId": {
@@ -273,7 +273,7 @@
                 }
             }
         },
-        "SubnetBRouteTableAssociation": {
+        "Subnet2RouteTableAssociation": {
             "Type": "AWS::EC2::SubnetRouteTableAssociation",
             "Properties": {
                 "RouteTableId": {
@@ -284,7 +284,7 @@
                 }
             }
         },
-        "SubnetCRouteTableAssociation": {
+        "Subnet3RouteTableAssociation": {
             "Type": "AWS::EC2::SubnetRouteTableAssociation",
             "Properties": {
                 "RouteTableId": {
@@ -297,7 +297,7 @@
         }
     },
     "Outputs": {
-        "Id": {
+        "Vpc": {
             "Description": "The resource ID of the VPC.",
             "Value": {
                 "Ref": "Vpc"
@@ -321,19 +321,19 @@
                 ]
             }
         },
-        "SubnetAId": {
+        "Subnet1": {
             "Description": "The resource ID of the Subnet 1.",
             "Value": {
                 "Ref": "Subnet1"
             }
         },
-        "SubnetBId": {
+        "Subnet2": {
             "Description": "The resource ID of the Subnet 2.",
             "Value": {
                 "Ref": "Subnet2"
             }
         },
-        "SubnetCId": {
+        "Subnet3": {
             "Description": "The resource ID of the Subnet 3.",
             "Value": {
                 "Ref": "Subnet3"

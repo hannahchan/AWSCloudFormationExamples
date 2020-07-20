@@ -296,7 +296,7 @@
         }
     },
     "Outputs": {
-        "Id": {
+        "Instance": {
             "Value": {
                 "Ref": "EC2Instance"
             }
