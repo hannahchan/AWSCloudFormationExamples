@@ -159,15 +159,7 @@
                     {
                         "Key": "Name",
                         "Value": {
-                            "Fn::Join": [
-                                " - ",
-                                [
-                                    {
-                                        "Fn::Sub": "${AWS::StackName}"
-                                    },
-                                    "Subnet 1"
-                                ]
-                            ]
+                            "Fn::Sub": "${AWS::StackName} - Subnet 1"
                         }
                     }
                 ],
@@ -192,15 +184,7 @@
                     {
                         "Key": "Name",
                         "Value": {
-                            "Fn::Join": [
-                                " - ",
-                                [
-                                    {
-                                        "Fn::Sub": "${AWS::StackName}"
-                                    },
-                                    "Subnet 2"
-                                ]
-                            ]
+                            "Fn::Sub": "${AWS::StackName} - Subnet 2"
                         }
                     }
                 ],
@@ -225,15 +209,7 @@
                     {
                         "Key": "Name",
                         "Value": {
-                            "Fn::Join": [
-                                " - ",
-                                [
-                                    {
-                                        "Fn::Sub": "${AWS::StackName}"
-                                    },
-                                    "Subnet 3"
-                                ]
-                            ]
+                            "Fn::Sub": "${AWS::StackName} - Subnet 3"
                         }
                     }
                 ],

@@ -190,15 +190,7 @@
                     {
                         "Key": "Name",
                         "Value": {
-                            "Fn::Join": [
-                                " - ",
-                                [
-                                    {
-                                        "Fn::Sub": "${AWS::StackName}"
-                                    },
-                                    "Public Subnet"
-                                ]
-                            ]
+                            "Fn::Sub": "${AWS::StackName} - Public Subnet"
                         }
                     }
                 ],
@@ -214,15 +206,7 @@
                     {
                         "Key": "Name",
                         "Value": {
-                            "Fn::Join": [
-                                " - ",
-                                [
-                                    {
-                                        "Fn::Sub": "${AWS::StackName}"
-                                    },
-                                    "Public Subnet Route Table"
-                                ]
-                            ]
+                            "Fn::Sub": "${AWS::StackName} - Public Subnet Route Table"
                         }
                     }
                 ],
@@ -267,15 +251,7 @@
                     {
                         "Key": "Name",
                         "Value": {
-                            "Fn::Join": [
-                                " - ",
-                                [
-                                    {
-                                        "Fn::Sub": "${AWS::StackName}"
-                                    },
-                                    "Private Subnet"
-                                ]
-                            ]
+                            "Fn::Sub": "${AWS::StackName} - Private Subnet"
                         }
                     }
                 ],
@@ -291,15 +267,7 @@
                     {
                         "Key": "Name",
                         "Value": {
-                            "Fn::Join": [
-                                " - ",
-                                [
-                                    {
-                                        "Fn::Sub": "${AWS::StackName}"
-                                    },
-                                    "Private Subnet Route Table"
-                                ]
-                            ]
+                            "Fn::Sub": "${AWS::StackName} - Private Subnet Route Table"
                         }
                     }
                 ],
@@ -365,15 +333,7 @@
                     {
                         "Key": "Name",
                         "Value": {
-                            "Fn::Join": [
-                                " - ",
-                                [
-                                    {
-                                        "Fn::Sub": "${AWS::StackName}"
-                                    },
-                                    "Data Subnet"
-                                ]
-                            ]
+                            "Fn::Sub": "${AWS::StackName} - Data Subnet"
                         }
                     }
                 ],
@@ -390,15 +350,7 @@
                     {
                         "Key": "Name",
                         "Value": {
-                            "Fn::Join": [
-                                " - ",
-                                [
-                                    {
-                                        "Fn::Sub": "${AWS::StackName}"
-                                    },
-                                    "Data Subnet Route Table"
-                                ]
-                            ]
+                            "Fn::Sub": "${AWS::StackName} - Data Subnet Route Table"
                         }
                     }
                 ],
@@ -425,6 +377,11 @@
             "Description": "The resource ID of the VPC.",
             "Value": {
                 "Ref": "Vpc"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-Vpc"
+                }
             }
         },
         "DefaultNetworkAcl": {
@@ -434,6 +391,11 @@
                     "Vpc",
                     "DefaultNetworkAcl"
                 ]
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-DefaultNetworkAcl"
+                }
             }
         },
         "DefaultSecurityGroup": {
@@ -443,18 +405,33 @@
                     "Vpc",
                     "DefaultSecurityGroup"
                 ]
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-DefaultSecurityGroup"
+                }
             }
         },
         "PublicSubnet": {
             "Description": "The resource ID of the public subnet.",
             "Value": {
                 "Ref": "PublicSubnet"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-PublicSubnet"
+                }
             }
         },
         "PrivateSubnet": {
             "Description": "The resource ID of the private subnet.",
             "Value": {
                 "Ref": "PrivateSubnet"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-PrivateSubnet"
+                }
             }
         },
         "DataSubnet": {
@@ -462,6 +439,11 @@
             "Description": "The resource ID of the data subnet.",
             "Value": {
                 "Ref": "DataSubnet"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-DataSubnet"
+                }
             }
         }
     }
