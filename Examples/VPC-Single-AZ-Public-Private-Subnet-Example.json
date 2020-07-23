@@ -423,17 +423,6 @@
                 }
             }
         },
-        "PublicSubnetRouteTable": {
-            "Description": "The resource ID of the route table for the public subnet.",
-            "Value": {
-                "Ref": "PublicSubnetRouteTable"
-            },
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-PublicSubnetRouteTable"
-                }
-            }
-        },
         "PrivateSubnet": {
             "Description": "The resource ID of the private subnet.",
             "Value": {
@@ -442,17 +431,6 @@
             "Export": {
                 "Name": {
                     "Fn::Sub": "${AWS::StackName}-PrivateSubnet"
-                }
-            }
-        },
-        "PrivateSubnetRouteTable": {
-            "Description": "The resource ID of the route table for the private subnet.",
-            "Value": {
-                "Ref": "PrivateSubnetRouteTable"
-            },
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-PrivateSubnetRouteTable"
                 }
             }
         },
@@ -465,18 +443,6 @@
             "Export": {
                 "Name": {
                     "Fn::Sub": "${AWS::StackName}-DataSubnet"
-                }
-            }
-        },
-        "DataSubnetRouteTable": {
-            "Condition": "CreateDataSubnet",
-            "Description": "The resource ID of the route table for the data subnet.",
-            "Value": {
-                "Ref": "DataSubnetRouteTable"
-            },
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-DataSubnetRouteTable"
                 }
             }
         }
