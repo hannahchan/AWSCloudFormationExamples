@@ -384,6 +384,17 @@
                 }
             }
         },
+        "VpcCidrBlock": {
+            "Description": "The IPv4 CIDR block of the VPC.",
+            "Value": {
+                "Ref": "VpcCidrBlock"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-VpcCidrBlock"
+                }
+            }
+        },
         "DefaultNetworkAcl": {
             "Description": "The default Network ACL ID of the VPC.",
             "Value": {
@@ -423,6 +434,17 @@
                 }
             }
         },
+        "PublicSubnetCidrBlock": {
+            "Description": "The IPv4 CIDR block of the public subnet.",
+            "Value": {
+                "Ref": "PublicSubnetCidrBlock"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-PublicSubnetCidrBlock"
+                }
+            }
+        },
         "PrivateSubnet": {
             "Description": "The resource ID of the private subnet.",
             "Value": {
@@ -431,6 +453,17 @@
             "Export": {
                 "Name": {
                     "Fn::Sub": "${AWS::StackName}-PrivateSubnet"
+                }
+            }
+        },
+        "PrivateSubnetCidrBlock": {
+            "Description": "The IPv4 CIDR block of the private subnet.",
+            "Value": {
+                "Ref": "PrivateSubnetCidrBlock"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-PrivateSubnetCidrBlock"
                 }
             }
         },
@@ -443,6 +476,18 @@
             "Export": {
                 "Name": {
                     "Fn::Sub": "${AWS::StackName}-DataSubnet"
+                }
+            }
+        },
+        "DataSubnetCidrBlock": {
+            "Condition": "CreateDataSubnet",
+            "Description": "The IPv4 CIDR block of the data subnet.",
+            "Value": {
+                "Ref": "DataSubnetCidrBlock"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-DataSubnetCidrBlock"
                 }
             }
         }
