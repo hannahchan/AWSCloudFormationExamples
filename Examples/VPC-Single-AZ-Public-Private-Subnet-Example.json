@@ -1,495 +1,465 @@
 {
-    "AWSTemplateFormatVersion": "2010-09-09",
-    "Description": "A VPC with a public, private and optional data subnet in a single availability zone.",
-    "Metadata": {
-        "AWS::CloudFormation::Interface": {
-            "ParameterGroups": [
-                {
-                    "Label": {
-                        "default": "General Configuration"
-                    },
-                    "Parameters": [
-                        "AvailabilityZone",
-                        "VpcCidrBlock"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Public Subnet Configuration"
-                    },
-                    "Parameters": [
-                        "PublicSubnetCidrBlock",
-                        "MapPublicIpOnLaunch"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Private Subnet Configuration"
-                    },
-                    "Parameters": [
-                        "PrivateSubnetCidrBlock",
-                        "IncludeNat"
-                    ]
-                },
-                {
-                    "Label": {
-                        "default": "Data Subnet Configuration"
-                    },
-                    "Parameters": [
-                        "IncludeDataSubnet",
-                        "DataSubnetCidrBlock"
-                    ]
-                }
-            ],
-            "ParameterLabels": {
-                "AvailabilityZone": {
-                    "default": "Availability Zone"
-                },
-                "VpcCidrBlock": {
-                    "default": "VPC IPv4 CIDR Block"
-                },
-                "PublicSubnetCidrBlock": {
-                    "default": "Public Subnet IPv4 CIDR Block"
-                },
-                "MapPublicIpOnLaunch": {
-                    "default": "Map Public IP On Launch"
-                },
-                "PrivateSubnetCidrBlock": {
-                    "default": "Private Subnet IPv4 CIDR Block"
-                },
-                "IncludeNat": {
-                    "default": "Include NAT Gateway"
-                },
-                "IncludeDataSubnet": {
-                    "default": "Include Data Subnet"
-                },
-                "DataSubnetCidrBlock": {
-                    "default": "Data Subnet IPv4 CIDR Block"
-                }
-            }
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "A VPC with a public, private and optional data subnet in a single availability zone.",
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": {
+            "default": "General Configuration"
+          },
+          "Parameters": ["AvailabilityZone", "VpcCidrBlock"]
+        },
+        {
+          "Label": {
+            "default": "Public Subnet Configuration"
+          },
+          "Parameters": ["PublicSubnetCidrBlock", "MapPublicIpOnLaunch"]
+        },
+        {
+          "Label": {
+            "default": "Private Subnet Configuration"
+          },
+          "Parameters": ["PrivateSubnetCidrBlock", "IncludeNat"]
+        },
+        {
+          "Label": {
+            "default": "Data Subnet Configuration"
+          },
+          "Parameters": ["IncludeDataSubnet", "DataSubnetCidrBlock"]
         }
-    },
-    "Parameters": {
+      ],
+      "ParameterLabels": {
         "AvailabilityZone": {
-            "Type": "AWS::EC2::AvailabilityZone::Name",
-            "Description": "The Availability Zone for the public, private and optional data subnet."
+          "default": "Availability Zone"
         },
         "VpcCidrBlock": {
-            "Type": "String",
-            "Default": "192.168.0.0/16",
-            "Description": "The IPv4 CIDR block to be used for the VPC."
+          "default": "VPC IPv4 CIDR Block"
         },
         "PublicSubnetCidrBlock": {
-            "Type": "String",
-            "Default": "192.168.0.0/24",
-            "Description": "The IPv4 CIDR block to be used for the public subnet."
+          "default": "Public Subnet IPv4 CIDR Block"
         },
         "MapPublicIpOnLaunch": {
-            "Type": "String",
-            "AllowedValues": [
-                true,
-                false
-            ],
-            "Default": false,
-            "Description": "Whether public IP addresses are assigned when EC2 Instances are launched in the public subnet."
+          "default": "Map Public IP On Launch"
         },
         "PrivateSubnetCidrBlock": {
-            "Type": "String",
-            "Default": "192.168.1.0/24",
-            "Description": "The IPv4 CIDR block to be used for the private subnet."
+          "default": "Private Subnet IPv4 CIDR Block"
         },
         "IncludeNat": {
-            "Type": "String",
-            "Default": "false",
-            "AllowedValues": [
-                "true",
-                "false"
-            ],
-            "Description": "Creates a NAT gateway if set to 'true'. Allows instances in the private subnet to access the internet."
+          "default": "Include NAT Gateway"
         },
         "IncludeDataSubnet": {
-            "Type": "String",
-            "Default": "false",
-            "AllowedValues": [
-                "true",
-                "false"
-            ],
-            "Description": "Creates a data subnet if set to 'true'."
+          "default": "Include Data Subnet"
         },
         "DataSubnetCidrBlock": {
-            "Type": "String",
-            "Default": "192.168.2.0/24",
-            "Description": "The IPv4 CIDR block to be used for the data subnet."
+          "default": "Data Subnet IPv4 CIDR Block"
         }
-    },
-    "Conditions": {
-        "CreateNatGateway": {
-            "Fn::Equals": [
-                {
-                    "Ref": "IncludeNat"
-                },
-                "true"
-            ]
-        },
-        "CreateDataSubnet": {
-            "Fn::Equals": [
-                {
-                    "Ref": "IncludeDataSubnet"
-                },
-                "true"
-            ]
-        }
-    },
-    "Resources": {
-        "Vpc": {
-            "Type": "AWS::EC2::VPC",
-            "Properties": {
-                "CidrBlock": {
-                    "Ref": "VpcCidrBlock"
-                },
-                "EnableDnsSupport": true,
-                "EnableDnsHostnames": true,
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Ref": "AWS::StackName"
-                        }
-                    }
-                ]
-            }
-        },
-        "InternetGateway": {
-            "Type": "AWS::EC2::InternetGateway",
-            "Properties": {}
-        },
-        "InternetGatewayAttachment": {
-            "Type": "AWS::EC2::VPCGatewayAttachment",
-            "Properties": {
-                "InternetGatewayId": {
-                    "Ref": "InternetGateway"
-                },
-                "VpcId": {
-                    "Ref": "Vpc"
-                }
-            }
-        },
-        "PublicSubnet": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "AvailabilityZone": {
-                    "Ref": "AvailabilityZone"
-                },
-                "CidrBlock": {
-                    "Ref": "PublicSubnetCidrBlock"
-                },
-                "MapPublicIpOnLaunch": {
-                    "Ref": "MapPublicIpOnLaunch"
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName} - Public Subnet"
-                        }
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "Vpc"
-                }
-            }
-        },
-        "PublicSubnetRouteTable": {
-            "Type": "AWS::EC2::RouteTable",
-            "Properties": {
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName} - Public Subnet Route Table"
-                        }
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "Vpc"
-                }
-            }
-        },
-        "PublicSubnetRouteTableAssociation": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "Properties": {
-                "RouteTableId": {
-                    "Ref": "PublicSubnetRouteTable"
-                },
-                "SubnetId": {
-                    "Ref": "PublicSubnet"
-                }
-            }
-        },
-        "InternetGatewayRoute": {
-            "Type": "AWS::EC2::Route",
-            "Properties": {
-                "RouteTableId": {
-                    "Ref": "PublicSubnetRouteTable"
-                },
-                "DestinationCidrBlock": "0.0.0.0/0",
-                "GatewayId": {
-                    "Ref": "InternetGateway"
-                }
-            }
-        },
-        "PrivateSubnet": {
-            "Type": "AWS::EC2::Subnet",
-            "Properties": {
-                "AvailabilityZone": {
-                    "Ref": "AvailabilityZone"
-                },
-                "CidrBlock": {
-                    "Ref": "PrivateSubnetCidrBlock"
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName} - Private Subnet"
-                        }
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "Vpc"
-                }
-            }
-        },
-        "PrivateSubnetRouteTable": {
-            "Type": "AWS::EC2::RouteTable",
-            "Properties": {
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName} - Private Subnet Route Table"
-                        }
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "Vpc"
-                }
-            }
-        },
-        "PrivateSubnetRouteTableAssociation": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "Properties": {
-                "RouteTableId": {
-                    "Ref": "PrivateSubnetRouteTable"
-                },
-                "SubnetId": {
-                    "Ref": "PrivateSubnet"
-                }
-            }
-        },
-        "NatElasticIp": {
-            "Type": "AWS::EC2::EIP",
-            "Condition": "CreateNatGateway"
-        },
-        "NatGateway": {
-            "Type": "AWS::EC2::NatGateway",
-            "Condition": "CreateNatGateway",
-            "Properties": {
-                "AllocationId": {
-                    "Fn::GetAtt": [
-                        "NatElasticIp",
-                        "AllocationId"
-                    ]
-                },
-                "SubnetId": {
-                    "Ref": "PublicSubnet"
-                }
-            }
-        },
-        "NatGatewayRoute": {
-            "Type": "AWS::EC2::Route",
-            "Condition": "CreateNatGateway",
-            "Properties": {
-                "RouteTableId": {
-                    "Ref": "PrivateSubnetRouteTable"
-                },
-                "DestinationCidrBlock": "0.0.0.0/0",
-                "NatGatewayId": {
-                    "Ref": "NatGateway"
-                }
-            }
-        },
-        "DataSubnet": {
-            "Type": "AWS::EC2::Subnet",
-            "Condition": "CreateDataSubnet",
-            "Properties": {
-                "AvailabilityZone": {
-                    "Ref": "AvailabilityZone"
-                },
-                "CidrBlock": {
-                    "Ref": "DataSubnetCidrBlock"
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName} - Data Subnet"
-                        }
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "Vpc"
-                }
-            }
-        },
-        "DataSubnetRouteTable": {
-            "Type": "AWS::EC2::RouteTable",
-            "Condition": "CreateDataSubnet",
-            "Properties": {
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Sub": "${AWS::StackName} - Data Subnet Route Table"
-                        }
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "Vpc"
-                }
-            }
-        },
-        "DataSubnetRouteTableAssociation": {
-            "Type": "AWS::EC2::SubnetRouteTableAssociation",
-            "Condition": "CreateDataSubnet",
-            "Properties": {
-                "RouteTableId": {
-                    "Ref": "DataSubnetRouteTable"
-                },
-                "SubnetId": {
-                    "Ref": "DataSubnet"
-                }
-            }
-        }
-    },
-    "Outputs": {
-        "Vpc": {
-            "Description": "The resource ID of the VPC.",
-            "Value": {
-                "Ref": "Vpc"
-            },
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-Vpc"
-                }
-            }
-        },
-        "VpcCidrBlock": {
-            "Description": "The IPv4 CIDR block of the VPC.",
-            "Value": {
-                "Ref": "VpcCidrBlock"
-            },
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-VpcCidrBlock"
-                }
-            }
-        },
-        "DefaultNetworkAcl": {
-            "Description": "The default Network ACL ID of the VPC.",
-            "Value": {
-                "Fn::GetAtt": [
-                    "Vpc",
-                    "DefaultNetworkAcl"
-                ]
-            },
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-DefaultNetworkAcl"
-                }
-            }
-        },
-        "DefaultSecurityGroup": {
-            "Description": "The default Security Group ID of the VPC.",
-            "Value": {
-                "Fn::GetAtt": [
-                    "Vpc",
-                    "DefaultSecurityGroup"
-                ]
-            },
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-DefaultSecurityGroup"
-                }
-            }
-        },
-        "PublicSubnet": {
-            "Description": "The resource ID of the public subnet.",
-            "Value": {
-                "Ref": "PublicSubnet"
-            },
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-PublicSubnet"
-                }
-            }
-        },
-        "PublicSubnetCidrBlock": {
-            "Description": "The IPv4 CIDR block of the public subnet.",
-            "Value": {
-                "Ref": "PublicSubnetCidrBlock"
-            },
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-PublicSubnetCidrBlock"
-                }
-            }
-        },
-        "PrivateSubnet": {
-            "Description": "The resource ID of the private subnet.",
-            "Value": {
-                "Ref": "PrivateSubnet"
-            },
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-PrivateSubnet"
-                }
-            }
-        },
-        "PrivateSubnetCidrBlock": {
-            "Description": "The IPv4 CIDR block of the private subnet.",
-            "Value": {
-                "Ref": "PrivateSubnetCidrBlock"
-            },
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-PrivateSubnetCidrBlock"
-                }
-            }
-        },
-        "DataSubnet": {
-            "Condition": "CreateDataSubnet",
-            "Description": "The resource ID of the data subnet.",
-            "Value": {
-                "Ref": "DataSubnet"
-            },
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-DataSubnet"
-                }
-            }
-        },
-        "DataSubnetCidrBlock": {
-            "Condition": "CreateDataSubnet",
-            "Description": "The IPv4 CIDR block of the data subnet.",
-            "Value": {
-                "Ref": "DataSubnetCidrBlock"
-            },
-            "Export": {
-                "Name": {
-                    "Fn::Sub": "${AWS::StackName}-DataSubnetCidrBlock"
-                }
-            }
-        }
+      }
     }
+  },
+  "Parameters": {
+    "AvailabilityZone": {
+      "Type": "AWS::EC2::AvailabilityZone::Name",
+      "Description": "The Availability Zone for the public, private and optional data subnet."
+    },
+    "VpcCidrBlock": {
+      "Type": "String",
+      "Default": "192.168.0.0/16",
+      "Description": "The IPv4 CIDR block to be used for the VPC."
+    },
+    "PublicSubnetCidrBlock": {
+      "Type": "String",
+      "Default": "192.168.0.0/24",
+      "Description": "The IPv4 CIDR block to be used for the public subnet."
+    },
+    "MapPublicIpOnLaunch": {
+      "Type": "String",
+      "AllowedValues": [true, false],
+      "Default": false,
+      "Description": "Whether public IP addresses are assigned when EC2 Instances are launched in the public subnet."
+    },
+    "PrivateSubnetCidrBlock": {
+      "Type": "String",
+      "Default": "192.168.1.0/24",
+      "Description": "The IPv4 CIDR block to be used for the private subnet."
+    },
+    "IncludeNat": {
+      "Type": "String",
+      "Default": "false",
+      "AllowedValues": ["true", "false"],
+      "Description": "Creates a NAT gateway if set to 'true'. Allows instances in the private subnet to access the internet."
+    },
+    "IncludeDataSubnet": {
+      "Type": "String",
+      "Default": "false",
+      "AllowedValues": ["true", "false"],
+      "Description": "Creates a data subnet if set to 'true'."
+    },
+    "DataSubnetCidrBlock": {
+      "Type": "String",
+      "Default": "192.168.2.0/24",
+      "Description": "The IPv4 CIDR block to be used for the data subnet."
+    }
+  },
+  "Conditions": {
+    "CreateNatGateway": {
+      "Fn::Equals": [
+        {
+          "Ref": "IncludeNat"
+        },
+        "true"
+      ]
+    },
+    "CreateDataSubnet": {
+      "Fn::Equals": [
+        {
+          "Ref": "IncludeDataSubnet"
+        },
+        "true"
+      ]
+    }
+  },
+  "Resources": {
+    "Vpc": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": {
+          "Ref": "VpcCidrBlock"
+        },
+        "EnableDnsSupport": true,
+        "EnableDnsHostnames": true,
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Ref": "AWS::StackName"
+            }
+          }
+        ]
+      }
+    },
+    "InternetGateway": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {}
+    },
+    "InternetGatewayAttachment": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "InternetGatewayId": {
+          "Ref": "InternetGateway"
+        },
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      }
+    },
+    "PublicSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Ref": "AvailabilityZone"
+        },
+        "CidrBlock": {
+          "Ref": "PublicSubnetCidrBlock"
+        },
+        "MapPublicIpOnLaunch": {
+          "Ref": "MapPublicIpOnLaunch"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName} - Public Subnet"
+            }
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      }
+    },
+    "PublicSubnetRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName} - Public Subnet Route Table"
+            }
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      }
+    },
+    "PublicSubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PublicSubnetRouteTable"
+        },
+        "SubnetId": {
+          "Ref": "PublicSubnet"
+        }
+      }
+    },
+    "InternetGatewayRoute": {
+      "Type": "AWS::EC2::Route",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PublicSubnetRouteTable"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "InternetGateway"
+        }
+      }
+    },
+    "PrivateSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Ref": "AvailabilityZone"
+        },
+        "CidrBlock": {
+          "Ref": "PrivateSubnetCidrBlock"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName} - Private Subnet"
+            }
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      }
+    },
+    "PrivateSubnetRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName} - Private Subnet Route Table"
+            }
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      }
+    },
+    "PrivateSubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateSubnetRouteTable"
+        },
+        "SubnetId": {
+          "Ref": "PrivateSubnet"
+        }
+      }
+    },
+    "NatElasticIp": {
+      "Type": "AWS::EC2::EIP",
+      "Condition": "CreateNatGateway"
+    },
+    "NatGateway": {
+      "Type": "AWS::EC2::NatGateway",
+      "Condition": "CreateNatGateway",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": ["NatElasticIp", "AllocationId"]
+        },
+        "SubnetId": {
+          "Ref": "PublicSubnet"
+        }
+      }
+    },
+    "NatGatewayRoute": {
+      "Type": "AWS::EC2::Route",
+      "Condition": "CreateNatGateway",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PrivateSubnetRouteTable"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "NatGateway"
+        }
+      }
+    },
+    "DataSubnet": {
+      "Type": "AWS::EC2::Subnet",
+      "Condition": "CreateDataSubnet",
+      "Properties": {
+        "AvailabilityZone": {
+          "Ref": "AvailabilityZone"
+        },
+        "CidrBlock": {
+          "Ref": "DataSubnetCidrBlock"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName} - Data Subnet"
+            }
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      }
+    },
+    "DataSubnetRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Condition": "CreateDataSubnet",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName} - Data Subnet Route Table"
+            }
+          }
+        ],
+        "VpcId": {
+          "Ref": "Vpc"
+        }
+      }
+    },
+    "DataSubnetRouteTableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Condition": "CreateDataSubnet",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "DataSubnetRouteTable"
+        },
+        "SubnetId": {
+          "Ref": "DataSubnet"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "Vpc": {
+      "Description": "The resource ID of the VPC.",
+      "Value": {
+        "Ref": "Vpc"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-Vpc"
+        }
+      }
+    },
+    "VpcCidrBlock": {
+      "Description": "The IPv4 CIDR block of the VPC.",
+      "Value": {
+        "Ref": "VpcCidrBlock"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-VpcCidrBlock"
+        }
+      }
+    },
+    "DefaultNetworkAcl": {
+      "Description": "The default Network ACL ID of the VPC.",
+      "Value": {
+        "Fn::GetAtt": ["Vpc", "DefaultNetworkAcl"]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DefaultNetworkAcl"
+        }
+      }
+    },
+    "DefaultSecurityGroup": {
+      "Description": "The default Security Group ID of the VPC.",
+      "Value": {
+        "Fn::GetAtt": ["Vpc", "DefaultSecurityGroup"]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DefaultSecurityGroup"
+        }
+      }
+    },
+    "PublicSubnet": {
+      "Description": "The resource ID of the public subnet.",
+      "Value": {
+        "Ref": "PublicSubnet"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-PublicSubnet"
+        }
+      }
+    },
+    "PublicSubnetCidrBlock": {
+      "Description": "The IPv4 CIDR block of the public subnet.",
+      "Value": {
+        "Ref": "PublicSubnetCidrBlock"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-PublicSubnetCidrBlock"
+        }
+      }
+    },
+    "PrivateSubnet": {
+      "Description": "The resource ID of the private subnet.",
+      "Value": {
+        "Ref": "PrivateSubnet"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-PrivateSubnet"
+        }
+      }
+    },
+    "PrivateSubnetCidrBlock": {
+      "Description": "The IPv4 CIDR block of the private subnet.",
+      "Value": {
+        "Ref": "PrivateSubnetCidrBlock"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-PrivateSubnetCidrBlock"
+        }
+      }
+    },
+    "DataSubnet": {
+      "Condition": "CreateDataSubnet",
+      "Description": "The resource ID of the data subnet.",
+      "Value": {
+        "Ref": "DataSubnet"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DataSubnet"
+        }
+      }
+    },
+    "DataSubnetCidrBlock": {
+      "Condition": "CreateDataSubnet",
+      "Description": "The IPv4 CIDR block of the data subnet.",
+      "Value": {
+        "Ref": "DataSubnetCidrBlock"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DataSubnetCidrBlock"
+        }
+      }
+    }
+  }
 }
