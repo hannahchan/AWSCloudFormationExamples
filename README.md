@@ -8,6 +8,10 @@ You can create CloudFormation stacks from the example templates either via the [
 
     aws cloudformation create-stack --stack-name <stack-name> --template-body file://<path-to-template>/<template>.json
 
+## Linting CloudFormation Templates
+
+When developing CloudFormation templates in this repository, please remember to lint your templates. We use [`cfn-lint`](https://github.com/aws-cloudformation/cfn-python-lint) and [Prettier](https://prettier.io/).
+
 ## More Information
 
 To learn more about AWS CloudFormation, head over to their product page at;
