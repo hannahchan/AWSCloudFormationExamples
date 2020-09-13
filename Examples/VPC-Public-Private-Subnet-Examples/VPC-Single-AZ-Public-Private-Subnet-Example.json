@@ -88,14 +88,14 @@
     },
     "IncludeNat": {
       "Type": "String",
-      "Default": "false",
-      "AllowedValues": ["true", "false"],
+      "Default": false,
+      "AllowedValues": [true, false],
       "Description": "Creates a NAT gateway if set to 'true'. Allows instances in the private subnet to access the internet."
     },
     "IncludeDataSubnet": {
       "Type": "String",
-      "Default": "false",
-      "AllowedValues": ["true", "false"],
+      "Default": false,
+      "AllowedValues": [true, false],
       "Description": "Creates a data subnet if set to 'true'."
     },
     "DataSubnetCidrBlock": {
@@ -111,7 +111,7 @@
         {
           "Ref": "IncludeNat"
         },
-        "true"
+        true
       ]
     },
     "CreateDataSubnet": {
@@ -119,7 +119,7 @@
         {
           "Ref": "IncludeDataSubnet"
         },
-        "true"
+        true
       ]
     }
   },
