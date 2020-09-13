@@ -8,12 +8,7 @@
           "Label": {
             "default": "General Configuration"
           },
-          "Parameters": [
-            "AvailabilityZone1",
-            "AvailabilityZone2",
-            "AvailabilityZone3",
-            "VpcCidrBlock"
-          ]
+          "Parameters": ["VpcCidrBlock"]
         },
         {
           "Label": {
@@ -50,15 +45,6 @@
         }
       ],
       "ParameterLabels": {
-        "AvailabilityZone1": {
-          "default": "Availability Zone 1"
-        },
-        "AvailabilityZone2": {
-          "default": "Availability Zone 2"
-        },
-        "AvailabilityZone3": {
-          "default": "Availability Zone 3"
-        },
         "VpcCidrBlock": {
           "default": "VPC IPv4 CIDR Block"
         },
@@ -102,18 +88,6 @@
     }
   },
   "Parameters": {
-    "AvailabilityZone1": {
-      "Type": "AWS::EC2::AvailabilityZone::Name",
-      "Description": "The Availability Zone for Public Subnet 1, Private Subnet 1 and optional Data Subnet 1."
-    },
-    "AvailabilityZone2": {
-      "Type": "AWS::EC2::AvailabilityZone::Name",
-      "Description": "The Availability Zone for Public Subnet 2, Private Subnet 2 and optional Data Subnet 2."
-    },
-    "AvailabilityZone3": {
-      "Type": "AWS::EC2::AvailabilityZone::Name",
-      "Description": "The Availability Zone for Public Subnet 3, Private Subnet 3 and optional Data Subnet 3."
-    },
     "VpcCidrBlock": {
       "Type": "String",
       "Default": "192.168.0.0/16",
@@ -258,7 +232,7 @@
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
-          "Ref": "AvailabilityZone1"
+          "Fn::Select": ["0", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
         "CidrBlock": {
           "Ref": "PublicSubnet1CidrBlock"
@@ -322,7 +296,7 @@
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
-          "Ref": "AvailabilityZone2"
+          "Fn::Select": ["1", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
         "CidrBlock": {
           "Ref": "PublicSubnet2CidrBlock"
@@ -386,7 +360,7 @@
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
-          "Ref": "AvailabilityZone3"
+          "Fn::Select": ["2", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
         "CidrBlock": {
           "Ref": "PublicSubnet3CidrBlock"
@@ -450,7 +424,7 @@
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
-          "Ref": "AvailabilityZone1"
+          "Fn::Select": ["0", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
         "CidrBlock": {
           "Ref": "PrivateSubnet1CidrBlock"
@@ -499,7 +473,7 @@
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
-          "Ref": "AvailabilityZone2"
+          "Fn::Select": ["1", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
         "CidrBlock": {
           "Ref": "PrivateSubnet2CidrBlock"
@@ -548,7 +522,7 @@
       "Type": "AWS::EC2::Subnet",
       "Properties": {
         "AvailabilityZone": {
-          "Ref": "AvailabilityZone3"
+          "Fn::Select": ["2", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
         "CidrBlock": {
           "Ref": "PrivateSubnet3CidrBlock"
@@ -739,7 +713,7 @@
       "Condition": "CreateDataSubnet",
       "Properties": {
         "AvailabilityZone": {
-          "Ref": "AvailabilityZone1"
+          "Fn::Select": ["0", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
         "CidrBlock": {
           "Ref": "DataSubnet1CidrBlock"
@@ -791,7 +765,7 @@
       "Condition": "CreateDataSubnet",
       "Properties": {
         "AvailabilityZone": {
-          "Ref": "AvailabilityZone2"
+          "Fn::Select": ["1", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
         "CidrBlock": {
           "Ref": "DataSubnet2CidrBlock"
@@ -843,7 +817,7 @@
       "Condition": "CreateDataSubnet",
       "Properties": {
         "AvailabilityZone": {
-          "Ref": "AvailabilityZone3"
+          "Fn::Select": ["2", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
         "CidrBlock": {
           "Ref": "DataSubnet3CidrBlock"
