@@ -8,9 +8,7 @@
           "Label": {
             "default": "General Configuration"
           },
-          "Parameters": [
-            "VpcCidrBlock"
-          ]
+          "Parameters": ["VpcCidrBlock"]
         },
         {
           "Label": {
