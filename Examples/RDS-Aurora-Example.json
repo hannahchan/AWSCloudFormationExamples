@@ -1,0 +1,297 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "An Aurora database cluster using default parameter groups.",
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": {
+            "default": "Network Configuration"
+          },
+          "Parameters": ["Vpc", "SubnetIds"]
+        },
+        {
+          "Label": {
+            "default": "Database Configuration"
+          },
+          "Parameters": [
+            "Engine",
+            "DBInstanceClass",
+            "IncludeReplicas",
+            "BackupRetentionPeriod",
+            "DeletionProtection",
+            "StorageEncrypted",
+            "MasterUsername",
+            "MasterUserPassword"
+          ]
+        }
+      ],
+      "ParameterLabels": {
+        "Vpc": {
+          "default": "VPC"
+        },
+        "SubnetIds": {
+          "default": "Subnet IDs"
+        },
+        "Engine": {
+          "default": "Database Engine"
+        },
+        "DBInstanceClass": {
+          "default": "Database Instance Class"
+        },
+        "IncludeReplicas": {
+          "default": "Include Replicas"
+        },
+        "BackupRetentionPeriod": {
+          "default": "Backup Retention Period"
+        },
+        "DeletionProtection": {
+          "default": "Deletion Protection"
+        },
+        "StorageEncrypted": {
+          "default": "Storage Encrypted"
+        },
+        "MasterUsername": {
+          "default": "Master Username"
+        },
+        "MasterUserPassword": {
+          "default": "Master User Password"
+        }
+      }
+    }
+  },
+  "Parameters": {
+    "Vpc": {
+      "Type": "AWS::EC2::VPC::Id",
+      "Description": "The VPC to create the database in."
+    },
+    "SubnetIds": {
+      "Type": "List<AWS::EC2::Subnet::Id>",
+      "Description": "The list of subnets to create database instances in."
+    },
+    "Engine": {
+      "Type": "String",
+      "Default": "aurora",
+      "AllowedValues": ["aurora", "aurora-mysql", "aurora-postgresql"],
+      "Description": "The database engine to be used for the database cluster."
+    },
+    "IncludeReplicas": {
+      "Type": "String",
+      "Default": false,
+      "AllowedValues": [true, false],
+      "Description": "Creates database replicas if set to 'true'."
+    },
+    "DBInstanceClass": {
+      "Type": "String",
+      "Default": "db.t3.medium",
+      "Description": "The database instance class to be used for the database instances."
+    },
+    "BackupRetentionPeriod": {
+      "Type": "Number",
+      "Default": 7,
+      "MinValue": 1,
+      "MaxValue": 35,
+      "Description": "The number of days for which automated backups are retained."
+    },
+    "DeletionProtection": {
+      "Type": "String",
+      "Default": false,
+      "AllowedValues": [true, false],
+      "Description": "Enables deletion protection if set to 'true'."
+    },
+    "StorageEncrypted": {
+      "Type": "String",
+      "Default": false,
+      "AllowedValues": [true, false],
+      "Description": "Creates a encrypted database cluster using the default KMS key if set to 'true'."
+    },
+    "MasterUsername": {
+      "Type": "String",
+      "Description": "The username for the master user of the database cluster."
+    },
+    "MasterUserPassword": {
+      "Type": "String",
+      "NoEcho": true,
+      "Description": "The password for the master user of the database cluster."
+    }
+  },
+  "Mappings": {
+    "Engine": {
+      "aurora": {
+        "DefaultDBClusterParameterGroupName": "default.aurora5.6",
+        "DefaultDBParameterGroupName": "default.aurora5.6",
+        "Family": "aurora5.6",
+        "Port": 3306
+      },
+      "aurora-mysql": {
+        "DefaultDBClusterParameterGroupName": "default.aurora-mysql5.7",
+        "DefaultDBParameterGroupName": "default.aurora-mysql5.7",
+        "Family": "aurora-mysql5.7",
+        "Port": 3306
+      },
+      "aurora-postgresql": {
+        "DefaultDBClusterParameterGroupName": "default.aurora-postgresql11",
+        "DefaultDBParameterGroupName": "default.aurora-postgresql11",
+        "Family": "aurora-postgresql11",
+        "Port": 5432
+      }
+    }
+  },
+  "Conditions": {
+    "CreateReplicas": {
+      "Fn::Equals": [
+        {
+          "Ref": "IncludeReplicas"
+        },
+        true
+      ]
+    }
+  },
+  "Resources": {
+    "SecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": {
+          "Fn::Sub": "Controls access to Aurora database - ${AWS::StackName}"
+        },
+        "GroupName": {
+          "Fn::Sub": "${AWS::StackName} - Database Security Group"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName} - Database Security Group"
+            }
+          }
+        ],
+        "VpcId": { "Ref": "Vpc" }
+      }
+    },
+    "DBSubnetGroup": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": {
+          "Fn::Sub": "Database Subnets for Aurora database - ${AWS::StackName}"
+        },
+        "SubnetIds": { "Ref": "SubnetIds" }
+      }
+    },
+    "DBCluster": {
+      "Type": "AWS::RDS::DBCluster",
+      "Properties": {
+        "BackupRetentionPeriod": { "Ref": "BackupRetentionPeriod" },
+        "DBClusterParameterGroupName": {
+          "Fn::FindInMap": [
+            "Engine",
+            { "Ref": "Engine" },
+            "DefaultDBClusterParameterGroupName"
+          ]
+        },
+        "DBSubnetGroupName": { "Ref": "DBSubnetGroup" },
+        "DeletionProtection": { "Ref": "DeletionProtection" },
+        "Engine": { "Ref": "Engine" },
+        "MasterUsername": { "Ref": "MasterUsername" },
+        "MasterUserPassword": { "Ref": "MasterUserPassword" },
+        "Port": {
+          "Fn::FindInMap": ["Engine", { "Ref": "Engine" }, "Port"]
+        },
+        "StorageEncrypted": { "Ref": "StorageEncrypted" },
+        "VpcSecurityGroupIds": [{ "Ref": "SecurityGroup" }]
+      }
+    },
+    "DBInstance1": {
+      "Type": "AWS::RDS::DBInstance",
+      "Properties": {
+        "DBClusterIdentifier": { "Ref": "DBCluster" },
+        "DBInstanceClass": { "Ref": "DBInstanceClass" },
+        "DBParameterGroupName": {
+          "Fn::FindInMap": [
+            "Engine",
+            { "Ref": "Engine" },
+            "DefaultDBParameterGroupName"
+          ]
+        },
+        "Engine": { "Ref": "Engine" }
+      }
+    },
+    "DBInstance2": {
+      "Type": "AWS::RDS::DBInstance",
+      "Condition": "CreateReplicas",
+      "Properties": {
+        "DBClusterIdentifier": { "Ref": "DBCluster" },
+        "DBInstanceClass": { "Ref": "DBInstanceClass" },
+        "DBParameterGroupName": {
+          "Fn::FindInMap": [
+            "Engine",
+            { "Ref": "Engine" },
+            "DefaultDBParameterGroupName"
+          ]
+        },
+        "Engine": { "Ref": "Engine" }
+      }
+    },
+    "DBInstance3": {
+      "Type": "AWS::RDS::DBInstance",
+      "Condition": "CreateReplicas",
+      "Properties": {
+        "DBClusterIdentifier": { "Ref": "DBCluster" },
+        "DBInstanceClass": { "Ref": "DBInstanceClass" },
+        "DBParameterGroupName": {
+          "Fn::FindInMap": [
+            "Engine",
+            { "Ref": "Engine" },
+            "DefaultDBParameterGroupName"
+          ]
+        },
+        "Engine": { "Ref": "Engine" }
+      }
+    }
+  },
+  "Outputs": {
+    "SecurityGroup": {
+      "Description": "The resource ID of the database Security Group.",
+      "Value": {
+        "Ref": "SecurityGroup"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-SecurityGroup"
+        }
+      }
+    },
+    "ClusterEndpoint": {
+      "Description": "The read/write endpoint for the database cluster.",
+      "Value": {
+        "Fn::GetAtt": ["DBCluster", "Endpoint.Address"]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DBClusterEndpoint"
+        }
+      }
+    },
+    "ClusterReadEndpoint": {
+      "Description": "The read endpoint for the database cluster.",
+      "Value": {
+        "Fn::GetAtt": ["DBCluster", "ReadEndpoint.Address"]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DBClusterReadEndpoint"
+        }
+      }
+    },
+    "ClusterPort": {
+      "Description": "The port used for the database cluster.",
+      "Value": {
+        "Fn::GetAtt": ["DBCluster", "Endpoint.Port"]
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-DBClusterPort"
+        }
+      }
+    }
+  }
+}
