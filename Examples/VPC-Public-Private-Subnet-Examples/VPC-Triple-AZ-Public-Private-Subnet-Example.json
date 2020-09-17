@@ -90,25 +90,25 @@
   "Parameters": {
     "VpcCidrBlock": {
       "Type": "String",
-      "Default": "192.168.0.0/16",
+      "Default": "172.16.0.0/16",
       "Description": "The IPv4 CIDR block to be used for the VPC.",
       "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
     },
     "PublicSubnet1CidrBlock": {
       "Type": "String",
-      "Default": "192.168.0.0/24",
+      "Default": "172.16.0.0/24",
       "Description": "The IPv4 CIDR block to be used for Public Subnet 1.",
       "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
     },
     "PublicSubnet2CidrBlock": {
       "Type": "String",
-      "Default": "192.168.1.0/24",
+      "Default": "172.16.1.0/24",
       "Description": "The IPv4 CIDR block to be used for Public Subnet 2.",
       "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
     },
     "PublicSubnet3CidrBlock": {
       "Type": "String",
-      "Default": "192.168.2.0/24",
+      "Default": "172.16.2.0/24",
       "Description": "The IPv4 CIDR block to be used for Public Subnet 3.",
       "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
     },
@@ -120,19 +120,19 @@
     },
     "PrivateSubnet1CidrBlock": {
       "Type": "String",
-      "Default": "192.168.3.0/24",
+      "Default": "172.16.3.0/24",
       "Description": "The IPv4 CIDR block to be used for Private Subnet 1.",
       "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
     },
     "PrivateSubnet2CidrBlock": {
       "Type": "String",
-      "Default": "192.168.4.0/24",
+      "Default": "172.16.4.0/24",
       "Description": "The IPv4 CIDR block to be used for Private Subnet 2.",
       "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
     },
     "PrivateSubnet3CidrBlock": {
       "Type": "String",
-      "Default": "192.168.5.0/24",
+      "Default": "172.16.5.0/24",
       "Description": "The IPv4 CIDR block to be used for Private Subnet 3.",
       "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
     },
@@ -150,19 +150,19 @@
     },
     "DataSubnet1CidrBlock": {
       "Type": "String",
-      "Default": "192.168.6.0/24",
+      "Default": "172.16.6.0/24",
       "Description": "The IPv4 CIDR block to be used for Data Subnet 1.",
       "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
     },
     "DataSubnet2CidrBlock": {
       "Type": "String",
-      "Default": "192.168.7.0/24",
+      "Default": "172.16.7.0/24",
       "Description": "The IPv4 CIDR block to be used for Data Subnet 2.",
       "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
     },
     "DataSubnet3CidrBlock": {
       "Type": "String",
-      "Default": "192.168.8.0/24",
+      "Default": "172.16.8.0/24",
       "Description": "The IPv4 CIDR block to be used for Data Subnet 3.",
       "AllowedPattern": "^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\\/([0-9]|[1-2][0-9]|3[0-2]))$"
     }
