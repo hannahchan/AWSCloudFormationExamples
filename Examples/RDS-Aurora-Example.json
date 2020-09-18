@@ -107,7 +107,8 @@
     },
     "MasterUsername": {
       "Type": "String",
-      "Description": "The username for the master user of the database cluster."
+      "Default": "",
+      "Description": "The username for the master user of the database cluster. Leave blank to use the default."
     },
     "MasterUserPassword": {
       "Type": "String",
@@ -120,18 +121,21 @@
       "aurora": {
         "DefaultDBClusterParameterGroupName": "default.aurora5.6",
         "DefaultDBParameterGroupName": "default.aurora5.6",
+        "DefaultMasterUsername": "root",
         "Family": "aurora5.6",
         "Port": 3306
       },
       "aurora-mysql": {
         "DefaultDBClusterParameterGroupName": "default.aurora-mysql5.7",
         "DefaultDBParameterGroupName": "default.aurora-mysql5.7",
+        "DefaultMasterUsername": "root",
         "Family": "aurora-mysql5.7",
         "Port": 3306
       },
       "aurora-postgresql": {
         "DefaultDBClusterParameterGroupName": "default.aurora-postgresql11",
         "DefaultDBParameterGroupName": "default.aurora-postgresql11",
+        "DefaultMasterUsername": "postgres",
         "Family": "aurora-postgresql11",
         "Port": 5432
       }
@@ -144,6 +148,14 @@
           "Ref": "IncludeReplicas"
         },
         true
+      ]
+    },
+    "UseDefaultMasterUsername": {
+      "Fn::Equals": [
+        {
+          "Ref": "MasterUsername"
+        },
+        ""
       ]
     }
   },
@@ -191,7 +203,19 @@
         "DBSubnetGroupName": { "Ref": "DBSubnetGroup" },
         "DeletionProtection": { "Ref": "DeletionProtection" },
         "Engine": { "Ref": "Engine" },
-        "MasterUsername": { "Ref": "MasterUsername" },
+        "MasterUsername": {
+          "Fn::If": [
+            "UseDefaultMasterUsername",
+            {
+              "Fn::FindInMap": [
+                "Engine",
+                { "Ref": "Engine" },
+                "DefaultMasterUsername"
+              ]
+            },
+            { "Ref": "MasterUsername" }
+          ]
+        },
         "MasterUserPassword": { "Ref": "MasterUserPassword" },
         "Port": {
           "Fn::FindInMap": ["Engine", { "Ref": "Engine" }, "Port"]
