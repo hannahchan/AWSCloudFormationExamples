@@ -1,29 +1,65 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "An Aurora database cluster using default parameter groups.",
+  "Description": "An Aurora database cluster.",
   "Metadata": {
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [
         {
           "Label": {
-            "default": "Network Configuration"
+            "default": "Credentials"
           },
-          "Parameters": ["Vpc", "SubnetIds"]
+          "Parameters": ["MasterUsername", "MasterUserPassword"]
         },
         {
           "Label": {
-            "default": "Database Configuration"
+            "default": "Cluster Configuration"
           },
           "Parameters": [
             "Engine",
             "DBInstanceClass",
             "IncludeReplicas",
-            "BackupRetentionPeriod",
-            "DeletionProtection",
-            "StorageEncrypted",
-            "MasterUsername",
-            "MasterUserPassword"
+            "DeletionProtection"
           ]
+        },
+        {
+          "Label": {
+            "default": "Network Connectivity"
+          },
+          "Parameters": ["Vpc", "SubnetIds"]
+        },
+        {
+          "Label": {
+            "default": "Maintenance and Backup"
+          },
+          "Parameters": ["AutoMinorVersionUpgrade", "BackupRetentionPeriod"]
+        },
+        {
+          "Label": {
+            "default": "Encryption"
+          },
+          "Parameters": ["StorageEncrypted", "KmsKeyId"]
+        },
+        {
+          "Label": {
+            "default": "Enhanced Monitoring"
+          },
+          "Parameters": ["MonitoringInterval", "MonitoringRoleArn"]
+        },
+        {
+          "Label": {
+            "default": "Performance Insights"
+          },
+          "Parameters": [
+            "EnablePerformanceInsights",
+            "PerformanceInsightsRetentionPeriod",
+            "PerformanceInsightsKMSKeyId"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Parameter Groups"
+          },
+          "Parameters": ["DBClusterParameterGroupName", "DBParameterGroupName"]
         }
       ],
       "ParameterLabels": {
@@ -42,25 +78,102 @@
         "IncludeReplicas": {
           "default": "Include Replicas"
         },
-        "BackupRetentionPeriod": {
-          "default": "Backup Retention Period"
-        },
         "DeletionProtection": {
           "default": "Deletion Protection"
         },
         "StorageEncrypted": {
           "default": "Storage Encrypted"
         },
+        "KmsKeyId": {
+          "default": "KMS Key"
+        },
         "MasterUsername": {
           "default": "Master Username"
         },
         "MasterUserPassword": {
           "default": "Master User Password"
+        },
+        "AutoMinorVersionUpgrade": {
+          "default": "Auto Minor Version Upgrade"
+        },
+        "BackupRetentionPeriod": {
+          "default": "Backup Retention Period"
+        },
+        "MonitoringInterval": {
+          "default": "Enhanced Monitoring Interval"
+        },
+        "MonitoringRoleArn": {
+          "default": "Enhanced Monitoring IAM Role ARN"
+        },
+        "EnablePerformanceInsights": {
+          "default": "Enable Performance Insights"
+        },
+        "PerformanceInsightsKMSKeyId": {
+          "default": "Performance Insights KMS Key"
+        },
+        "PerformanceInsightsRetentionPeriod": {
+          "default": "Performance Insights Retention Period"
+        },
+        "DBClusterParameterGroupName": {
+          "default": "Database Cluster Parameter Group Name"
+        },
+        "DBParameterGroupName": {
+          "default": "Database Parameter Group Name"
         }
       }
     }
   },
   "Parameters": {
+    "MasterUsername": {
+      "Type": "String",
+      "Default": "",
+      "Description": "The username for the master user of the database cluster."
+    },
+    "MasterUserPassword": {
+      "Type": "String",
+      "NoEcho": true,
+      "Description": "The password for the master user of the database cluster."
+    },
+    "Engine": {
+      "Type": "String",
+      "Default": "aurora",
+      "AllowedValues": ["aurora", "aurora-mysql", "aurora-postgresql"],
+      "Description": "The database engine to be used for the database cluster."
+    },
+    "DBInstanceClass": {
+      "Type": "String",
+      "Default": "db.t3.medium",
+      "AllowedValues": [
+        "db.r4.large",
+        "db.r4.xlarge",
+        "db.r4.2xlarge",
+        "db.r4.4xlarge",
+        "db.r4.8xlarge",
+        "db.r4.16xlarge",
+        "db.r5.large",
+        "db.r5.xlarge",
+        "db.r5.2xlarge",
+        "db.r5.4xlarge",
+        "db.r5.8xlarge",
+        "db.r5.12xlarge",
+        "db.r5.16xlarge",
+        "db.r5.24xlarge",
+        "db.t3.medium"
+      ],
+      "Description": "The database instance class to be used for the database instances."
+    },
+    "IncludeReplicas": {
+      "Type": "String",
+      "Default": false,
+      "AllowedValues": [true, false],
+      "Description": "Creates database replicas if set to 'true'."
+    },
+    "DeletionProtection": {
+      "Type": "String",
+      "Default": false,
+      "AllowedValues": [true, false],
+      "Description": "Enables deletion protection if set to 'true'."
+    },
     "Vpc": {
       "Type": "AWS::EC2::VPC::Id",
       "Description": "The VPC to create the database in."
@@ -69,22 +182,11 @@
       "Type": "List<AWS::EC2::Subnet::Id>",
       "Description": "The list of subnets to create database instances in."
     },
-    "Engine": {
+    "AutoMinorVersionUpgrade": {
       "Type": "String",
-      "Default": "aurora",
-      "AllowedValues": ["aurora", "aurora-mysql", "aurora-postgresql"],
-      "Description": "The database engine to be used for the database cluster."
-    },
-    "IncludeReplicas": {
-      "Type": "String",
-      "Default": false,
+      "Default": true,
       "AllowedValues": [true, false],
-      "Description": "Creates database replicas if set to 'true'."
-    },
-    "DBInstanceClass": {
-      "Type": "String",
-      "Default": "db.t3.medium",
-      "Description": "The database instance class to be used for the database instances."
+      "Description": "Enables minor engine version upgrades during the maintenance window if set to 'true'."
     },
     "BackupRetentionPeriod": {
       "Type": "Number",
@@ -93,27 +195,54 @@
       "MaxValue": 35,
       "Description": "The number of days for which automated backups are retained."
     },
-    "DeletionProtection": {
-      "Type": "String",
-      "Default": false,
-      "AllowedValues": [true, false],
-      "Description": "Enables deletion protection if set to 'true'."
-    },
     "StorageEncrypted": {
       "Type": "String",
-      "Default": false,
+      "Default": true,
       "AllowedValues": [true, false],
-      "Description": "Creates a encrypted database cluster using the default KMS key if set to 'true'."
+      "Description": "Creates a encrypted database cluster if set to 'true'."
     },
-    "MasterUsername": {
+    "KmsKeyId": {
       "Type": "String",
       "Default": "",
-      "Description": "The username for the master user of the database cluster. Leave blank to use the default."
+      "Description": "The ARN of the KMS key to use for the encryption of the cluster. Leave blank to use the default KMS key."
     },
-    "MasterUserPassword": {
+    "MonitoringInterval": {
+      "Type": "Number",
+      "Default": 0,
+      "AllowedValues": [0, 1, 5, 10, 15, 30, 60],
+      "Description": "The granularity in seconds to be used for Enhanced Monitoring. Enhanced Monitoring is disabled if the value is set to '0'."
+    },
+    "MonitoringRoleArn": {
       "Type": "String",
-      "NoEcho": true,
-      "Description": "The password for the master user of the database cluster."
+      "Default": "",
+      "Description": "The IAM role that permits RDS to send Enhanced Monitoring metrics to Amazon CloudWatch Logs. Required if Enhanced Monitoring is enabled."
+    },
+    "EnablePerformanceInsights": {
+      "Type": "String",
+      "Default": false,
+      "AllowedValues": [true, false],
+      "Description": "Enables Performance Insights if set to 'true'."
+    },
+    "PerformanceInsightsKMSKeyId": {
+      "Type": "String",
+      "Default": "",
+      "Description": "The ARN of the KMS key to use for the encryption of Performance Insights data. Leave blank to use the default KMS key."
+    },
+    "PerformanceInsightsRetentionPeriod": {
+      "Type": "Number",
+      "Default": 7,
+      "AllowedValues": [7, 731],
+      "Description": "By default Performance Insights data is retained for 7 days. The only other option is for 2 years (731 days)."
+    },
+    "DBClusterParameterGroupName": {
+      "Type": "String",
+      "Default": "",
+      "Description": "The name of the database cluster parameter group to associate with this database cluster. Leave blank to use default."
+    },
+    "DBParameterGroupName": {
+      "Type": "String",
+      "Default": "",
+      "Description": "The name of the database parameter group to associate with the database instances in this cluster. Leave blank to use default."
     }
   },
   "Mappings": {
@@ -148,6 +277,50 @@
           "Ref": "IncludeReplicas"
         },
         true
+      ]
+    },
+    "EnableEnhancedMonitoring": {
+      "Fn::Not": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "MonitoringInterval"
+            },
+            0
+          ]
+        }
+      ]
+    },
+    "UseDefaultDBClusterParameterGroupName": {
+      "Fn::Equals": [
+        {
+          "Ref": "DBClusterParameterGroupName"
+        },
+        ""
+      ]
+    },
+    "UseDefaultDBParameterGroupName": {
+      "Fn::Equals": [
+        {
+          "Ref": "DBParameterGroupName"
+        },
+        ""
+      ]
+    },
+    "UseDefaultKmsKey": {
+      "Fn::Equals": [
+        {
+          "Ref": "KmsKeyId"
+        },
+        ""
+      ]
+    },
+    "UseDefaultKmsKeyForPerformanceInsights": {
+      "Fn::Equals": [
+        {
+          "Ref": "PerformanceInsightsKMSKeyId"
+        },
+        ""
       ]
     },
     "UseDefaultMasterUsername": {
@@ -194,15 +367,28 @@
       "Properties": {
         "BackupRetentionPeriod": { "Ref": "BackupRetentionPeriod" },
         "DBClusterParameterGroupName": {
-          "Fn::FindInMap": [
-            "Engine",
-            { "Ref": "Engine" },
-            "DefaultDBClusterParameterGroupName"
+          "Fn::If": [
+            "UseDefaultDBClusterParameterGroupName",
+            {
+              "Fn::FindInMap": [
+                "Engine",
+                { "Ref": "Engine" },
+                "DefaultDBClusterParameterGroupName"
+              ]
+            },
+            { "Ref": "DBClusterParameterGroupName" }
           ]
         },
         "DBSubnetGroupName": { "Ref": "DBSubnetGroup" },
         "DeletionProtection": { "Ref": "DeletionProtection" },
         "Engine": { "Ref": "Engine" },
+        "KmsKeyId": {
+          "Fn::If": [
+            "UseDefaultKmsKey",
+            { "Ref": "AWS::NoValue" },
+            { "Ref": "KmsKeyId" }
+          ]
+        },
         "MasterUsername": {
           "Fn::If": [
             "UseDefaultMasterUsername",
@@ -227,48 +413,126 @@
     "DBInstance1": {
       "Type": "AWS::RDS::DBInstance",
       "Properties": {
+        "AutoMinorVersionUpgrade": { "Ref": "AutoMinorVersionUpgrade" },
         "DBClusterIdentifier": { "Ref": "DBCluster" },
         "DBInstanceClass": { "Ref": "DBInstanceClass" },
         "DBParameterGroupName": {
-          "Fn::FindInMap": [
-            "Engine",
-            { "Ref": "Engine" },
-            "DefaultDBParameterGroupName"
+          "Fn::If": [
+            "UseDefaultDBParameterGroupName",
+            {
+              "Fn::FindInMap": [
+                "Engine",
+                { "Ref": "Engine" },
+                "DefaultDBParameterGroupName"
+              ]
+            },
+            { "Ref": "DBParameterGroupName" }
           ]
         },
-        "Engine": { "Ref": "Engine" }
+        "Engine": { "Ref": "Engine" },
+        "EnablePerformanceInsights": { "Ref": "EnablePerformanceInsights" },
+        "MonitoringInterval": { "Ref": "MonitoringInterval" },
+        "MonitoringRoleArn": {
+          "Fn::If": [
+            "EnableEnhancedMonitoring",
+            { "Ref": "MonitoringRoleArn" },
+            { "Ref": "AWS::NoValue" }
+          ]
+        },
+        "PerformanceInsightsKMSKeyId": {
+          "Fn::If": [
+            "UseDefaultKmsKeyForPerformanceInsights",
+            { "Ref": "AWS::NoValue" },
+            { "Ref": "PerformanceInsightsKMSKeyId" }
+          ]
+        },
+        "PerformanceInsightsRetentionPeriod": {
+          "Ref": "PerformanceInsightsRetentionPeriod"
+        }
       }
     },
     "DBInstance2": {
       "Type": "AWS::RDS::DBInstance",
       "Condition": "CreateReplicas",
       "Properties": {
+        "AutoMinorVersionUpgrade": { "Ref": "AutoMinorVersionUpgrade" },
         "DBClusterIdentifier": { "Ref": "DBCluster" },
         "DBInstanceClass": { "Ref": "DBInstanceClass" },
         "DBParameterGroupName": {
-          "Fn::FindInMap": [
-            "Engine",
-            { "Ref": "Engine" },
-            "DefaultDBParameterGroupName"
+          "Fn::If": [
+            "UseDefaultDBParameterGroupName",
+            {
+              "Fn::FindInMap": [
+                "Engine",
+                { "Ref": "Engine" },
+                "DefaultDBParameterGroupName"
+              ]
+            },
+            { "Ref": "DBParameterGroupName" }
           ]
         },
-        "Engine": { "Ref": "Engine" }
+        "Engine": { "Ref": "Engine" },
+        "EnablePerformanceInsights": { "Ref": "EnablePerformanceInsights" },
+        "MonitoringInterval": { "Ref": "MonitoringInterval" },
+        "MonitoringRoleArn": {
+          "Fn::If": [
+            "EnableEnhancedMonitoring",
+            { "Ref": "MonitoringRoleArn" },
+            { "Ref": "AWS::NoValue" }
+          ]
+        },
+        "PerformanceInsightsKMSKeyId": {
+          "Fn::If": [
+            "UseDefaultKmsKeyForPerformanceInsights",
+            { "Ref": "AWS::NoValue" },
+            { "Ref": "PerformanceInsightsKMSKeyId" }
+          ]
+        },
+        "PerformanceInsightsRetentionPeriod": {
+          "Ref": "PerformanceInsightsRetentionPeriod"
+        }
       }
     },
     "DBInstance3": {
       "Type": "AWS::RDS::DBInstance",
       "Condition": "CreateReplicas",
       "Properties": {
+        "AutoMinorVersionUpgrade": { "Ref": "AutoMinorVersionUpgrade" },
         "DBClusterIdentifier": { "Ref": "DBCluster" },
         "DBInstanceClass": { "Ref": "DBInstanceClass" },
         "DBParameterGroupName": {
-          "Fn::FindInMap": [
-            "Engine",
-            { "Ref": "Engine" },
-            "DefaultDBParameterGroupName"
+          "Fn::If": [
+            "UseDefaultDBParameterGroupName",
+            {
+              "Fn::FindInMap": [
+                "Engine",
+                { "Ref": "Engine" },
+                "DefaultDBParameterGroupName"
+              ]
+            },
+            { "Ref": "DBParameterGroupName" }
           ]
         },
-        "Engine": { "Ref": "Engine" }
+        "Engine": { "Ref": "Engine" },
+        "EnablePerformanceInsights": { "Ref": "EnablePerformanceInsights" },
+        "MonitoringInterval": { "Ref": "MonitoringInterval" },
+        "MonitoringRoleArn": {
+          "Fn::If": [
+            "EnableEnhancedMonitoring",
+            { "Ref": "MonitoringRoleArn" },
+            { "Ref": "AWS::NoValue" }
+          ]
+        },
+        "PerformanceInsightsKMSKeyId": {
+          "Fn::If": [
+            "UseDefaultKmsKeyForPerformanceInsights",
+            { "Ref": "AWS::NoValue" },
+            { "Ref": "PerformanceInsightsKMSKeyId" }
+          ]
+        },
+        "PerformanceInsightsRetentionPeriod": {
+          "Ref": "PerformanceInsightsRetentionPeriod"
+        }
       }
     }
   },
