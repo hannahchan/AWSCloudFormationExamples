@@ -43,7 +43,7 @@
           "Label": {
             "default": "Enhanced Monitoring"
           },
-          "Parameters": ["MonitoringInterval", "MonitoringRoleArn"]
+          "Parameters": ["MonitoringInterval"]
         },
         {
           "Label": {
@@ -101,9 +101,6 @@
         },
         "MonitoringInterval": {
           "default": "Enhanced Monitoring Interval"
-        },
-        "MonitoringRoleArn": {
-          "default": "Enhanced Monitoring IAM Role ARN"
         },
         "EnablePerformanceInsights": {
           "default": "Enable Performance Insights"
@@ -212,11 +209,6 @@
       "AllowedValues": [0, 1, 5, 10, 15, 30, 60],
       "Description": "The granularity in seconds to be used for Enhanced Monitoring. Enhanced Monitoring is disabled if the value is set to '0'."
     },
-    "MonitoringRoleArn": {
-      "Type": "String",
-      "Default": "",
-      "Description": "The IAM role that permits RDS to send Enhanced Monitoring metrics to Amazon CloudWatch Logs. Required if Enhanced Monitoring is enabled."
-    },
     "EnablePerformanceInsights": {
       "Type": "String",
       "Default": false,
@@ -307,28 +299,68 @@
         ""
       ]
     },
-    "UseDefaultKmsKey": {
-      "Fn::Equals": [
-        {
-          "Ref": "KmsKeyId"
-        },
-        ""
-      ]
-    },
-    "UseDefaultKmsKeyForPerformanceInsights": {
-      "Fn::Equals": [
-        {
-          "Ref": "PerformanceInsightsKMSKeyId"
-        },
-        ""
-      ]
-    },
     "UseDefaultMasterUsername": {
       "Fn::Equals": [
         {
           "Ref": "MasterUsername"
         },
         ""
+      ]
+    },
+    "UseKmsKey": {
+      "Fn::And": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "StorageEncrypted"
+            },
+            true
+          ]
+        },
+        {
+          "Fn::Not": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "KmsKeyId"
+                },
+                ""
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "UseKmsKeyForPerformanceInsights": {
+      "Fn::And": [
+        {
+          "Fn::Equals": [
+            {
+              "Ref": "EnablePerformanceInsights"
+            },
+            true
+          ]
+        },
+        {
+          "Fn::Not": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "PerformanceInsightsKMSKeyId"
+                },
+                ""
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "UsePerformanceInsightsRetentionPeriod": {
+      "Fn::Equals": [
+        {
+          "Ref": "EnablePerformanceInsights"
+        },
+        true
       ]
     }
   },
@@ -362,6 +394,31 @@
         "SubnetIds": { "Ref": "SubnetIds" }
       }
     },
+    "EnhancedMonitoringRole": {
+      "Type": "AWS::IAM::Role",
+      "Condition": "EnableEnhancedMonitoring",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "monitoring.rds.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Description": {
+          "Fn::Sub": "${AWS::StackName} - RDS Enhanced Monitoring Role"
+        },
+        "ManagedPolicyArns": [
+          "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
+        ]
+      }
+    },
     "DBCluster": {
       "Type": "AWS::RDS::DBCluster",
       "Properties": {
@@ -384,9 +441,9 @@
         "Engine": { "Ref": "Engine" },
         "KmsKeyId": {
           "Fn::If": [
-            "UseDefaultKmsKey",
-            { "Ref": "AWS::NoValue" },
-            { "Ref": "KmsKeyId" }
+            "UseKmsKey",
+            { "Ref": "KmsKeyId" },
+            { "Ref": "AWS::NoValue" }
           ]
         },
         "MasterUsername": {
@@ -435,19 +492,23 @@
         "MonitoringRoleArn": {
           "Fn::If": [
             "EnableEnhancedMonitoring",
-            { "Ref": "MonitoringRoleArn" },
+            { "Fn::GetAtt": ["EnhancedMonitoringRole", "Arn"] },
             { "Ref": "AWS::NoValue" }
           ]
         },
         "PerformanceInsightsKMSKeyId": {
           "Fn::If": [
-            "UseDefaultKmsKeyForPerformanceInsights",
-            { "Ref": "AWS::NoValue" },
-            { "Ref": "PerformanceInsightsKMSKeyId" }
+            "UseKmsKeyForPerformanceInsights",
+            { "Ref": "PerformanceInsightsKMSKeyId" },
+            { "Ref": "AWS::NoValue" }
           ]
         },
         "PerformanceInsightsRetentionPeriod": {
-          "Ref": "PerformanceInsightsRetentionPeriod"
+          "Fn::If": [
+            "UsePerformanceInsightsRetentionPeriod",
+            { "Ref": "PerformanceInsightsRetentionPeriod" },
+            { "Ref": "AWS::NoValue" }
+          ]
         }
       }
     },
@@ -477,19 +538,23 @@
         "MonitoringRoleArn": {
           "Fn::If": [
             "EnableEnhancedMonitoring",
-            { "Ref": "MonitoringRoleArn" },
+            { "Fn::GetAtt": ["EnhancedMonitoringRole", "Arn"] },
             { "Ref": "AWS::NoValue" }
           ]
         },
         "PerformanceInsightsKMSKeyId": {
           "Fn::If": [
-            "UseDefaultKmsKeyForPerformanceInsights",
-            { "Ref": "AWS::NoValue" },
-            { "Ref": "PerformanceInsightsKMSKeyId" }
+            "UseKmsKeyForPerformanceInsights",
+            { "Ref": "PerformanceInsightsKMSKeyId" },
+            { "Ref": "AWS::NoValue" }
           ]
         },
         "PerformanceInsightsRetentionPeriod": {
-          "Ref": "PerformanceInsightsRetentionPeriod"
+          "Fn::If": [
+            "UsePerformanceInsightsRetentionPeriod",
+            { "Ref": "PerformanceInsightsRetentionPeriod" },
+            { "Ref": "AWS::NoValue" }
+          ]
         }
       }
     },
@@ -519,19 +584,23 @@
         "MonitoringRoleArn": {
           "Fn::If": [
             "EnableEnhancedMonitoring",
-            { "Ref": "MonitoringRoleArn" },
+            { "Fn::GetAtt": ["EnhancedMonitoringRole", "Arn"] },
             { "Ref": "AWS::NoValue" }
           ]
         },
         "PerformanceInsightsKMSKeyId": {
           "Fn::If": [
-            "UseDefaultKmsKeyForPerformanceInsights",
-            { "Ref": "AWS::NoValue" },
-            { "Ref": "PerformanceInsightsKMSKeyId" }
+            "UseKmsKeyForPerformanceInsights",
+            { "Ref": "PerformanceInsightsKMSKeyId" },
+            { "Ref": "AWS::NoValue" }
           ]
         },
         "PerformanceInsightsRetentionPeriod": {
-          "Ref": "PerformanceInsightsRetentionPeriod"
+          "Fn::If": [
+            "UsePerformanceInsightsRetentionPeriod",
+            { "Ref": "PerformanceInsightsRetentionPeriod" },
+            { "Ref": "AWS::NoValue" }
+          ]
         }
       }
     }
