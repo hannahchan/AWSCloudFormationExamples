@@ -427,7 +427,13 @@
           "Ref": "PrivateSubnetNetworkAcl"
         },
         "CidrBlock": {
-          "Ref": "VpcCidrBlock"
+          "Fn::If": [
+            "CreateNatGateway",
+            "0.0.0.0/0",
+            {
+              "Ref": "VpcCidrBlock"
+            }
+          ]
         },
         "Protocol": -1,
         "RuleAction": "allow",
@@ -441,7 +447,13 @@
           "Ref": "PrivateSubnetNetworkAcl"
         },
         "CidrBlock": {
-          "Ref": "VpcCidrBlock"
+          "Fn::If": [
+            "CreateNatGateway",
+            "0.0.0.0/0",
+            {
+              "Ref": "VpcCidrBlock"
+            }
+          ]
         },
         "Egress": true,
         "Protocol": -1,
