@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "A Systems Manager managed bastion with its own Security Group.",
+  "Description": "A Systems Manager managed Amazon Linux bastion with its own Security Group.",
   "Metadata": {
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [
