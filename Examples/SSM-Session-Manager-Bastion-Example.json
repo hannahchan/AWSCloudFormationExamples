@@ -5,34 +5,20 @@
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [
         {
-          "Label": {
-            "default": "Bastion Configuration"
-          },
+          "Label": { "default": "Bastion Configuration" },
           "Parameters": ["InstanceType", "KeyName"]
         },
         {
-          "Label": {
-            "default": "Network Configuration"
-          },
+          "Label": { "default": "Network Configuration" },
           "Parameters": ["VpcId", "SubnetId", "IncludeElasticIp"]
         }
       ],
       "ParameterLabels": {
-        "InstanceType": {
-          "default": "Instance Type"
-        },
-        "KeyName": {
-          "default": "Key Name"
-        },
-        "VpcId": {
-          "default": "VPC"
-        },
-        "SubnetId": {
-          "default": "Subnet"
-        },
-        "IncludeElasticIp": {
-          "default": "Include Elastic IP"
-        }
+        "InstanceType": { "default": "Instance Type" },
+        "KeyName": { "default": "Key Name" },
+        "VpcId": { "default": "VPC" },
+        "SubnetId": { "default": "Subnet" },
+        "IncludeElasticIp": { "default": "Include Elastic IP" }
       }
     }
   },
@@ -90,9 +76,7 @@
           "Statement": [
             {
               "Effect": "Allow",
-              "Principal": {
-                "Service": "ec2.amazonaws.com"
-              },
+              "Principal": { "Service": "ec2.amazonaws.com" },
               "Action": "sts:AssumeRole"
             }
           ]
@@ -126,9 +110,7 @@
             }
           }
         ],
-        "RoleName": {
-          "Fn::Sub": "${AWS::StackName}-SSMSessionManagerRole"
-        }
+        "RoleName": { "Fn::Sub": "${AWS::StackName}-SSMSessionManagerRole" }
       }
     },
     "InstanceProfile": {
@@ -137,18 +119,14 @@
         "InstanceProfileName": {
           "Fn::Sub": "${AWS::StackName}-SSMSessionManagerRole"
         },
-        "Roles": [
-          {
-            "Ref": "SSMSessionManagerRole"
-          }
-        ]
+        "Roles": [{ "Ref": "SSMSessionManagerRole" }]
       }
     },
     "SecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "GroupDescription": {
-          "Fn::Sub": "Security Group for EC2 Instance: ${AWS::StackName}"
+          "Fn::Sub": "Security Group for EC2 Instance:${AWS::StackName}"
         },
         "GroupName": {
           "Fn::Sub": "${AWS::StackName} - Bastion Security Group"
@@ -156,14 +134,10 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": {
-              "Fn::Sub": "${AWS::StackName} - Bastion Security Group"
-            }
+            "Value": { "Fn::Sub": "${AWS::StackName} - Bastion Security Group" }
           }
         ],
-        "VpcId": {
-          "Ref": "VpcId"
-        }
+        "VpcId": { "Ref": "VpcId" }
       }
     },
     "EC2Instance": {
@@ -171,26 +145,11 @@
       "Properties": {
         "IamInstanceProfile": { "Ref": "InstanceProfile" },
         "ImageId": "ami-0f96495a064477ffb",
-        "InstanceType": {
-          "Ref": "InstanceType"
-        },
+        "InstanceType": { "Ref": "InstanceType" },
         "KeyName": { "Ref": "KeyName" },
-        "SecurityGroupIds": [
-          {
-            "Ref": "SecurityGroup"
-          }
-        ],
-        "SubnetId": {
-          "Ref": "SubnetId"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": {
-              "Fn::Sub": "${AWS::StackName}"
-            }
-          }
-        ]
+        "SecurityGroupIds": [{ "Ref": "SecurityGroup" }],
+        "SubnetId": { "Ref": "SubnetId" },
+        "Tags": [{ "Key": "Name", "Value": { "Fn::Sub": "${AWS::StackName}" } }]
       }
     },
     "EC2InstanceElasticIp": {
@@ -204,36 +163,26 @@
         "AllocationId": {
           "Fn::GetAtt": ["EC2InstanceElasticIp", "AllocationId"]
         },
-        "InstanceId": {
-          "Ref": "EC2Instance"
-        }
+        "InstanceId": { "Ref": "EC2Instance" }
       }
     }
   },
   "Outputs": {
     "SecurityGroup": {
       "Description": "The resource ID of the Security Group containing the bastion.",
-      "Value": {
-        "Ref": "SecurityGroup"
-      }
+      "Value": { "Ref": "SecurityGroup" }
     },
     "Instance": {
       "Description": "The resource ID of the EC2 Instance of the bastion.",
-      "Value": {
-        "Ref": "EC2Instance"
-      }
+      "Value": { "Ref": "EC2Instance" }
     },
     "PrivateDnsName": {
       "Description": "The private DNS name of the bastion.",
-      "Value": {
-        "Fn::GetAtt": ["EC2Instance", "PrivateDnsName"]
-      }
+      "Value": { "Fn::GetAtt": ["EC2Instance", "PrivateDnsName"] }
     },
     "PublicDnsName": {
       "Description": "The public DNS name of the bastion.",
-      "Value": {
-        "Fn::GetAtt": ["EC2Instance", "PublicDnsName"]
-      }
+      "Value": { "Fn::GetAtt": ["EC2Instance", "PublicDnsName"] }
     }
   }
 }

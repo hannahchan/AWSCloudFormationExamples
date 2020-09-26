@@ -5,21 +5,15 @@
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [
         {
-          "Label": {
-            "default": "Instance Configuration"
-          },
+          "Label": { "default": "Instance Configuration" },
           "Parameters": ["ImageId", "InstanceType", "KeyName"]
         },
         {
-          "Label": {
-            "default": "Network Configuration"
-          },
+          "Label": { "default": "Network Configuration" },
           "Parameters": ["VpcId", "SubnetId", "IncludeElasticIp"]
         },
         {
-          "Label": {
-            "default": "Security Group Configuration"
-          },
+          "Label": { "default": "Security Group Configuration" },
           "Parameters": [
             "IngressSourceCidrBlock",
             "EnableIngressRuleSSH",
@@ -29,36 +23,16 @@
         }
       ],
       "ParameterLabels": {
-        "ImageId": {
-          "default": "Image ID"
-        },
-        "InstanceType": {
-          "default": "Instance Type"
-        },
-        "KeyName": {
-          "default": "Key Name"
-        },
-        "VpcId": {
-          "default": "VPC"
-        },
-        "SubnetId": {
-          "default": "Subnet"
-        },
-        "IncludeElasticIp": {
-          "default": "Include Elastic IP"
-        },
-        "IngressSourceCidrBlock": {
-          "default": "Ingress Source"
-        },
-        "EnableIngressRuleSSH": {
-          "default": "Enable Ingress Rule for SSH"
-        },
-        "EnableIngressRuleRDP": {
-          "default": "Enable Ingress Rule for RDP"
-        },
-        "EnableIngressRuleWinRM": {
-          "default": "Enable Ingress Rule for WinRM"
-        }
+        "ImageId": { "default": "Image ID" },
+        "InstanceType": { "default": "Instance Type" },
+        "KeyName": { "default": "Key Name" },
+        "VpcId": { "default": "VPC" },
+        "SubnetId": { "default": "Subnet" },
+        "IncludeElasticIp": { "default": "Include Elastic IP" },
+        "IngressSourceCidrBlock": { "default": "Ingress Source" },
+        "EnableIngressRuleSSH": { "default": "Enable Ingress Rule for SSH" },
+        "EnableIngressRuleRDP": { "default": "Enable Ingress Rule for RDP" },
+        "EnableIngressRuleWinRM": { "default": "Enable Ingress Rule for WinRM" }
       }
     }
   },
@@ -116,68 +90,27 @@
     }
   },
   "Conditions": {
-    "CreateElasticIp": {
-      "Fn::Equals": [
-        {
-          "Ref": "IncludeElasticIp"
-        },
-        true
-      ]
-    },
+    "CreateElasticIp": { "Fn::Equals": [{ "Ref": "IncludeElasticIp" }, true] },
     "CreateIngressRuleSSH": {
-      "Fn::Equals": [
-        {
-          "Ref": "EnableIngressRuleSSH"
-        },
-        true
-      ]
+      "Fn::Equals": [{ "Ref": "EnableIngressRuleSSH" }, true]
     },
     "CreateIngressRuleRDP": {
-      "Fn::Equals": [
-        {
-          "Ref": "EnableIngressRuleRDP"
-        },
-        true
-      ]
+      "Fn::Equals": [{ "Ref": "EnableIngressRuleRDP" }, true]
     },
     "CreateIngressRuleWinRM": {
-      "Fn::Equals": [
-        {
-          "Ref": "EnableIngressRuleWinRM"
-        },
-        true
-      ]
+      "Fn::Equals": [{ "Ref": "EnableIngressRuleWinRM" }, true]
     }
   },
   "Resources": {
     "EC2Instance": {
       "Type": "AWS::EC2::Instance",
       "Properties": {
-        "ImageId": {
-          "Ref": "ImageId"
-        },
-        "InstanceType": {
-          "Ref": "InstanceType"
-        },
-        "KeyName": {
-          "Ref": "KeyName"
-        },
-        "SecurityGroupIds": [
-          {
-            "Ref": "SecurityGroup"
-          }
-        ],
-        "SubnetId": {
-          "Ref": "SubnetId"
-        },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": {
-              "Ref": "AWS::StackName"
-            }
-          }
-        ]
+        "ImageId": { "Ref": "ImageId" },
+        "InstanceType": { "Ref": "InstanceType" },
+        "KeyName": { "Ref": "KeyName" },
+        "SecurityGroupIds": [{ "Ref": "SecurityGroup" }],
+        "SubnetId": { "Ref": "SubnetId" },
+        "Tags": [{ "Key": "Name", "Value": { "Ref": "AWS::StackName" } }]
       }
     },
     "EC2InstanceElasticIp": {
@@ -191,94 +124,61 @@
         "AllocationId": {
           "Fn::GetAtt": ["EC2InstanceElasticIp", "AllocationId"]
         },
-        "InstanceId": {
-          "Ref": "EC2Instance"
-        }
+        "InstanceId": { "Ref": "EC2Instance" }
       }
     },
     "SecurityGroup": {
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
-        "GroupName": {
-          "Ref": "AWS::StackName"
-        },
+        "GroupName": { "Ref": "AWS::StackName" },
         "GroupDescription": {
-          "Fn::Sub": "Security Group for EC2 Instance: ${AWS::StackName}"
+          "Fn::Sub": "Security Group for EC2 Instance:${AWS::StackName}"
         },
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": {
-              "Ref": "AWS::StackName"
-            }
-          }
-        ],
-        "VpcId": {
-          "Ref": "VpcId"
-        }
+        "Tags": [{ "Key": "Name", "Value": { "Ref": "AWS::StackName" } }],
+        "VpcId": { "Ref": "VpcId" }
       }
     },
     "IngressRuleSSH": {
       "Condition": "CreateIngressRuleSSH",
       "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
-        "GroupId": {
-          "Fn::GetAtt": ["SecurityGroup", "GroupId"]
-        },
+        "GroupId": { "Fn::GetAtt": ["SecurityGroup", "GroupId"] },
         "IpProtocol": "tcp",
         "FromPort": 22,
         "ToPort": 22,
-        "CidrIp": {
-          "Ref": "IngressSourceCidrBlock"
-        }
+        "CidrIp": { "Ref": "IngressSourceCidrBlock" }
       }
     },
     "IngressRuleRDP": {
       "Condition": "CreateIngressRuleRDP",
       "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
-        "GroupId": {
-          "Fn::GetAtt": ["SecurityGroup", "GroupId"]
-        },
+        "GroupId": { "Fn::GetAtt": ["SecurityGroup", "GroupId"] },
         "IpProtocol": "tcp",
         "FromPort": 3389,
         "ToPort": 3389,
-        "CidrIp": {
-          "Ref": "IngressSourceCidrBlock"
-        }
+        "CidrIp": { "Ref": "IngressSourceCidrBlock" }
       }
     },
     "IngressRuleWinRM": {
       "Condition": "CreateIngressRuleWinRM",
       "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
-        "GroupId": {
-          "Fn::GetAtt": ["SecurityGroup", "GroupId"]
-        },
+        "GroupId": { "Fn::GetAtt": ["SecurityGroup", "GroupId"] },
         "IpProtocol": "tcp",
         "FromPort": 5985,
         "ToPort": 5985,
-        "CidrIp": {
-          "Ref": "IngressSourceCidrBlock"
-        }
+        "CidrIp": { "Ref": "IngressSourceCidrBlock" }
       }
     }
   },
   "Outputs": {
-    "Instance": {
-      "Value": {
-        "Ref": "EC2Instance"
-      }
-    },
+    "Instance": { "Value": { "Ref": "EC2Instance" } },
     "PrivateDnsName": {
-      "Value": {
-        "Fn::GetAtt": ["EC2Instance", "PrivateDnsName"]
-      }
+      "Value": { "Fn::GetAtt": ["EC2Instance", "PrivateDnsName"] }
     },
     "PublicDnsName": {
-      "Value": {
-        "Fn::GetAtt": ["EC2Instance", "PublicDnsName"]
-      }
+      "Value": { "Fn::GetAtt": ["EC2Instance", "PublicDnsName"] }
     }
   }
 }

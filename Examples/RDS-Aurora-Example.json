@@ -5,15 +5,11 @@
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [
         {
-          "Label": {
-            "default": "Credentials"
-          },
+          "Label": { "default": "Credentials" },
           "Parameters": ["MasterUsername", "MasterUserPassword"]
         },
         {
-          "Label": {
-            "default": "Cluster Configuration"
-          },
+          "Label": { "default": "Cluster Configuration" },
           "Parameters": [
             "Engine",
             "DBInstanceClass",
@@ -22,33 +18,23 @@
           ]
         },
         {
-          "Label": {
-            "default": "Network Connectivity"
-          },
+          "Label": { "default": "Network Connectivity" },
           "Parameters": ["Vpc", "SubnetIds"]
         },
         {
-          "Label": {
-            "default": "Maintenance and Backup"
-          },
+          "Label": { "default": "Maintenance and Backup" },
           "Parameters": ["AutoMinorVersionUpgrade", "BackupRetentionPeriod"]
         },
         {
-          "Label": {
-            "default": "Encryption"
-          },
+          "Label": { "default": "Encryption" },
           "Parameters": ["StorageEncrypted", "KmsKeyId"]
         },
         {
-          "Label": {
-            "default": "Enhanced Monitoring"
-          },
+          "Label": { "default": "Enhanced Monitoring" },
           "Parameters": ["MonitoringInterval"]
         },
         {
-          "Label": {
-            "default": "Performance Insights"
-          },
+          "Label": { "default": "Performance Insights" },
           "Parameters": [
             "EnablePerformanceInsights",
             "PerformanceInsightsRetentionPeriod",
@@ -56,52 +42,24 @@
           ]
         },
         {
-          "Label": {
-            "default": "Parameter Groups"
-          },
+          "Label": { "default": "Parameter Groups" },
           "Parameters": ["DBClusterParameterGroupName", "DBParameterGroupName"]
         }
       ],
       "ParameterLabels": {
-        "Vpc": {
-          "default": "VPC"
-        },
-        "SubnetIds": {
-          "default": "Subnet IDs"
-        },
-        "Engine": {
-          "default": "Database Engine"
-        },
-        "DBInstanceClass": {
-          "default": "Database Instance Class"
-        },
-        "IncludeReplicas": {
-          "default": "Include Replicas"
-        },
-        "DeletionProtection": {
-          "default": "Deletion Protection"
-        },
-        "StorageEncrypted": {
-          "default": "Storage Encrypted"
-        },
-        "KmsKeyId": {
-          "default": "KMS Key"
-        },
-        "MasterUsername": {
-          "default": "Master Username"
-        },
-        "MasterUserPassword": {
-          "default": "Master User Password"
-        },
-        "AutoMinorVersionUpgrade": {
-          "default": "Auto Minor Version Upgrade"
-        },
-        "BackupRetentionPeriod": {
-          "default": "Backup Retention Period"
-        },
-        "MonitoringInterval": {
-          "default": "Enhanced Monitoring Interval"
-        },
+        "Vpc": { "default": "VPC" },
+        "SubnetIds": { "default": "Subnet IDs" },
+        "Engine": { "default": "Database Engine" },
+        "DBInstanceClass": { "default": "Database Instance Class" },
+        "IncludeReplicas": { "default": "Include Replicas" },
+        "DeletionProtection": { "default": "Deletion Protection" },
+        "StorageEncrypted": { "default": "Storage Encrypted" },
+        "KmsKeyId": { "default": "KMS Key" },
+        "MasterUsername": { "default": "Master Username" },
+        "MasterUserPassword": { "default": "Master User Password" },
+        "AutoMinorVersionUpgrade": { "default": "Auto Minor Version Upgrade" },
+        "BackupRetentionPeriod": { "default": "Backup Retention Period" },
+        "MonitoringInterval": { "default": "Enhanced Monitoring Interval" },
         "EnablePerformanceInsights": {
           "default": "Enable Performance Insights"
         },
@@ -114,9 +72,7 @@
         "DBClusterParameterGroupName": {
           "default": "Database Cluster Parameter Group Name"
         },
-        "DBParameterGroupName": {
-          "default": "Database Parameter Group Name"
-        }
+        "DBParameterGroupName": { "default": "Database Parameter Group Name" }
       }
     }
   },
@@ -263,105 +219,37 @@
     }
   },
   "Conditions": {
-    "CreateReplicas": {
-      "Fn::Equals": [
-        {
-          "Ref": "IncludeReplicas"
-        },
-        true
-      ]
-    },
+    "CreateReplicas": { "Fn::Equals": [{ "Ref": "IncludeReplicas" }, true] },
     "EnableEnhancedMonitoring": {
-      "Fn::Not": [
-        {
-          "Fn::Equals": [
-            {
-              "Ref": "MonitoringInterval"
-            },
-            0
-          ]
-        }
-      ]
+      "Fn::Not": [{ "Fn::Equals": [{ "Ref": "MonitoringInterval" }, 0] }]
     },
     "UseDefaultDBClusterParameterGroupName": {
-      "Fn::Equals": [
-        {
-          "Ref": "DBClusterParameterGroupName"
-        },
-        ""
-      ]
+      "Fn::Equals": [{ "Ref": "DBClusterParameterGroupName" }, ""]
     },
     "UseDefaultDBParameterGroupName": {
-      "Fn::Equals": [
-        {
-          "Ref": "DBParameterGroupName"
-        },
-        ""
-      ]
+      "Fn::Equals": [{ "Ref": "DBParameterGroupName" }, ""]
     },
     "UseDefaultMasterUsername": {
-      "Fn::Equals": [
-        {
-          "Ref": "MasterUsername"
-        },
-        ""
-      ]
+      "Fn::Equals": [{ "Ref": "MasterUsername" }, ""]
     },
     "UseKmsKey": {
       "Fn::And": [
-        {
-          "Fn::Equals": [
-            {
-              "Ref": "StorageEncrypted"
-            },
-            true
-          ]
-        },
-        {
-          "Fn::Not": [
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "KmsKeyId"
-                },
-                ""
-              ]
-            }
-          ]
-        }
+        { "Fn::Equals": [{ "Ref": "StorageEncrypted" }, true] },
+        { "Fn::Not": [{ "Fn::Equals": [{ "Ref": "KmsKeyId" }, ""] }] }
       ]
     },
     "UseKmsKeyForPerformanceInsights": {
       "Fn::And": [
-        {
-          "Fn::Equals": [
-            {
-              "Ref": "EnablePerformanceInsights"
-            },
-            true
-          ]
-        },
+        { "Fn::Equals": [{ "Ref": "EnablePerformanceInsights" }, true] },
         {
           "Fn::Not": [
-            {
-              "Fn::Equals": [
-                {
-                  "Ref": "PerformanceInsightsKMSKeyId"
-                },
-                ""
-              ]
-            }
+            { "Fn::Equals": [{ "Ref": "PerformanceInsightsKMSKeyId" }, ""] }
           ]
         }
       ]
     },
     "UsePerformanceInsightsRetentionPeriod": {
-      "Fn::Equals": [
-        {
-          "Ref": "EnablePerformanceInsights"
-        },
-        true
-      ]
+      "Fn::Equals": [{ "Ref": "EnablePerformanceInsights" }, true]
     }
   },
   "Resources": {
@@ -404,9 +292,7 @@
             {
               "Sid": "",
               "Effect": "Allow",
-              "Principal": {
-                "Service": "monitoring.rds.amazonaws.com"
-              },
+              "Principal": { "Service": "monitoring.rds.amazonaws.com" },
               "Action": "sts:AssumeRole"
             }
           ]
@@ -460,9 +346,7 @@
           ]
         },
         "MasterUserPassword": { "Ref": "MasterUserPassword" },
-        "Port": {
-          "Fn::FindInMap": ["Engine", { "Ref": "Engine" }, "Port"]
-        },
+        "Port": { "Fn::FindInMap": ["Engine", { "Ref": "Engine" }, "Port"] },
         "StorageEncrypted": { "Ref": "StorageEncrypted" },
         "VpcSecurityGroupIds": [{ "Ref": "SecurityGroup" }]
       }
@@ -608,47 +492,25 @@
   "Outputs": {
     "SecurityGroup": {
       "Description": "The resource ID of the database Security Group.",
-      "Value": {
-        "Ref": "SecurityGroup"
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-SecurityGroup"
-        }
-      }
+      "Value": { "Ref": "SecurityGroup" },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-SecurityGroup" } }
     },
     "ClusterEndpoint": {
       "Description": "The read/write endpoint for the database cluster.",
-      "Value": {
-        "Fn::GetAtt": ["DBCluster", "Endpoint.Address"]
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-DBClusterEndpoint"
-        }
-      }
+      "Value": { "Fn::GetAtt": ["DBCluster", "Endpoint.Address"] },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-DBClusterEndpoint" } }
     },
     "ClusterReadEndpoint": {
       "Description": "The read endpoint for the database cluster.",
-      "Value": {
-        "Fn::GetAtt": ["DBCluster", "ReadEndpoint.Address"]
-      },
+      "Value": { "Fn::GetAtt": ["DBCluster", "ReadEndpoint.Address"] },
       "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-DBClusterReadEndpoint"
-        }
+        "Name": { "Fn::Sub": "${AWS::StackName}-DBClusterReadEndpoint" }
       }
     },
     "ClusterPort": {
       "Description": "The port used for the database cluster.",
-      "Value": {
-        "Fn::GetAtt": ["DBCluster", "Endpoint.Port"]
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-DBClusterPort"
-        }
-      }
+      "Value": { "Fn::GetAtt": ["DBCluster", "Endpoint.Port"] },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-DBClusterPort" } }
     }
   }
 }

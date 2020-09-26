@@ -5,15 +5,11 @@
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [
         {
-          "Label": {
-            "default": "General Configuration"
-          },
+          "Label": { "default": "General Configuration" },
           "Parameters": ["VpcCidrBlock"]
         },
         {
-          "Label": {
-            "default": "Public Subnet Configuration"
-          },
+          "Label": { "default": "Public Subnet Configuration" },
           "Parameters": [
             "PublicSubnet1CidrBlock",
             "PublicSubnet2CidrBlock",
@@ -22,9 +18,7 @@
           ]
         },
         {
-          "Label": {
-            "default": "Private Subnet Configuration"
-          },
+          "Label": { "default": "Private Subnet Configuration" },
           "Parameters": [
             "PrivateSubnet1CidrBlock",
             "PrivateSubnet2CidrBlock",
@@ -33,9 +27,7 @@
           ]
         },
         {
-          "Label": {
-            "default": "Data Subnet Configuration"
-          },
+          "Label": { "default": "Data Subnet Configuration" },
           "Parameters": [
             "IncludeDataSubnets",
             "DataSubnet1CidrBlock",
@@ -45,9 +37,7 @@
         }
       ],
       "ParameterLabels": {
-        "VpcCidrBlock": {
-          "default": "VPC IPv4 CIDR Block"
-        },
+        "VpcCidrBlock": { "default": "VPC IPv4 CIDR Block" },
         "PublicSubnet1CidrBlock": {
           "default": "Public Subnet 1 IPv4 CIDR Block"
         },
@@ -57,9 +47,7 @@
         "PublicSubnet3CidrBlock": {
           "default": "Public Subnet 3 IPv4 CIDR Block"
         },
-        "MapPublicIpOnLaunch": {
-          "default": "Map Public IP On Launch"
-        },
+        "MapPublicIpOnLaunch": { "default": "Map Public IP On Launch" },
         "PrivateSubnet1CidrBlock": {
           "default": "Private Subnet 1 IPv4 CIDR Block"
         },
@@ -69,21 +57,11 @@
         "PrivateSubnet3CidrBlock": {
           "default": "Private Subnet 3 IPv4 CIDR Block"
         },
-        "IncludeNat": {
-          "default": "Include NAT Gateway"
-        },
-        "IncludeDataSubnets": {
-          "default": "Include Data Subnets"
-        },
-        "DataSubnet1CidrBlock": {
-          "default": "Data Subnet 1 IPv4 CIDR Block"
-        },
-        "DataSubnet2CidrBlock": {
-          "default": "Data Subnet 2 IPv4 CIDR Block"
-        },
-        "DataSubnet3CidrBlock": {
-          "default": "Data Subnet 3 IPv4 CIDR Block"
-        }
+        "IncludeNat": { "default": "Include NAT Gateway" },
+        "IncludeDataSubnets": { "default": "Include Data Subnets" },
+        "DataSubnet1CidrBlock": { "default": "Data Subnet 1 IPv4 CIDR Block" },
+        "DataSubnet2CidrBlock": { "default": "Data Subnet 2 IPv4 CIDR Block" },
+        "DataSubnet3CidrBlock": { "default": "Data Subnet 3 IPv4 CIDR Block" }
       }
     }
   },
@@ -168,40 +146,19 @@
     }
   },
   "Conditions": {
-    "CreateNatGateway": {
-      "Fn::Equals": [
-        {
-          "Ref": "IncludeNat"
-        },
-        true
-      ]
-    },
+    "CreateNatGateway": { "Fn::Equals": [{ "Ref": "IncludeNat" }, true] },
     "CreateDataSubnet": {
-      "Fn::Equals": [
-        {
-          "Ref": "IncludeDataSubnets"
-        },
-        true
-      ]
+      "Fn::Equals": [{ "Ref": "IncludeDataSubnets" }, true]
     }
   },
   "Resources": {
     "Vpc": {
       "Type": "AWS::EC2::VPC",
       "Properties": {
-        "CidrBlock": {
-          "Ref": "VpcCidrBlock"
-        },
+        "CidrBlock": { "Ref": "VpcCidrBlock" },
         "EnableDnsSupport": true,
         "EnableDnsHostnames": true,
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": {
-              "Ref": "AWS::StackName"
-            }
-          }
-        ]
+        "Tags": [{ "Key": "Name", "Value": { "Ref": "AWS::StackName" } }]
       }
     },
     "InternetGateway": {
@@ -210,9 +167,7 @@
         "Tags": [
           {
             "Key": "Name",
-            "Value": {
-              "Fn::Sub": "${AWS::StackName} - Internet Gateway"
-            }
+            "Value": { "Fn::Sub": "${AWS::StackName} - Internet Gateway" }
           }
         ]
       }
@@ -220,12 +175,8 @@
     "InternetGatewayAttachment": {
       "Type": "AWS::EC2::VPCGatewayAttachment",
       "Properties": {
-        "InternetGatewayId": {
-          "Ref": "InternetGateway"
-        },
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "InternetGatewayId": { "Ref": "InternetGateway" },
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "PublicSubnet1": {
@@ -234,23 +185,15 @@
         "AvailabilityZone": {
           "Fn::Select": ["0", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
-        "CidrBlock": {
-          "Ref": "PublicSubnet1CidrBlock"
-        },
-        "MapPublicIpOnLaunch": {
-          "Ref": "MapPublicIpOnLaunch"
-        },
+        "CidrBlock": { "Ref": "PublicSubnet1CidrBlock" },
+        "MapPublicIpOnLaunch": { "Ref": "MapPublicIpOnLaunch" },
         "Tags": [
           {
             "Key": "Name",
-            "Value": {
-              "Fn::Sub": "${AWS::StackName} - Public Subnet 1"
-            }
+            "Value": { "Fn::Sub": "${AWS::StackName} - Public Subnet 1" }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "PublicSubnet1RouteTable": {
@@ -264,32 +207,22 @@
             }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "PublicSubnet1RouteTableAssociation": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
-        "RouteTableId": {
-          "Ref": "PublicSubnet1RouteTable"
-        },
-        "SubnetId": {
-          "Ref": "PublicSubnet1"
-        }
+        "RouteTableId": { "Ref": "PublicSubnet1RouteTable" },
+        "SubnetId": { "Ref": "PublicSubnet1" }
       }
     },
     "PublicSubnet1InternetGatewayRoute": {
       "Type": "AWS::EC2::Route",
       "Properties": {
-        "RouteTableId": {
-          "Ref": "PublicSubnet1RouteTable"
-        },
+        "RouteTableId": { "Ref": "PublicSubnet1RouteTable" },
         "DestinationCidrBlock": "0.0.0.0/0",
-        "GatewayId": {
-          "Ref": "InternetGateway"
-        }
+        "GatewayId": { "Ref": "InternetGateway" }
       }
     },
     "PublicSubnet2": {
@@ -298,23 +231,15 @@
         "AvailabilityZone": {
           "Fn::Select": ["1", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
-        "CidrBlock": {
-          "Ref": "PublicSubnet2CidrBlock"
-        },
-        "MapPublicIpOnLaunch": {
-          "Ref": "MapPublicIpOnLaunch"
-        },
+        "CidrBlock": { "Ref": "PublicSubnet2CidrBlock" },
+        "MapPublicIpOnLaunch": { "Ref": "MapPublicIpOnLaunch" },
         "Tags": [
           {
             "Key": "Name",
-            "Value": {
-              "Fn::Sub": "${AWS::StackName} - Public Subnet 2"
-            }
+            "Value": { "Fn::Sub": "${AWS::StackName} - Public Subnet 2" }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "PublicSubnet2RouteTable": {
@@ -328,32 +253,22 @@
             }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "PublicSubnet2RouteTableAssociation": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
-        "RouteTableId": {
-          "Ref": "PublicSubnet2RouteTable"
-        },
-        "SubnetId": {
-          "Ref": "PublicSubnet2"
-        }
+        "RouteTableId": { "Ref": "PublicSubnet2RouteTable" },
+        "SubnetId": { "Ref": "PublicSubnet2" }
       }
     },
     "PublicSubnet2InternetGatewayRoute": {
       "Type": "AWS::EC2::Route",
       "Properties": {
-        "RouteTableId": {
-          "Ref": "PublicSubnet2RouteTable"
-        },
+        "RouteTableId": { "Ref": "PublicSubnet2RouteTable" },
         "DestinationCidrBlock": "0.0.0.0/0",
-        "GatewayId": {
-          "Ref": "InternetGateway"
-        }
+        "GatewayId": { "Ref": "InternetGateway" }
       }
     },
     "PublicSubnet3": {
@@ -362,23 +277,15 @@
         "AvailabilityZone": {
           "Fn::Select": ["2", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
-        "CidrBlock": {
-          "Ref": "PublicSubnet3CidrBlock"
-        },
-        "MapPublicIpOnLaunch": {
-          "Ref": "MapPublicIpOnLaunch"
-        },
+        "CidrBlock": { "Ref": "PublicSubnet3CidrBlock" },
+        "MapPublicIpOnLaunch": { "Ref": "MapPublicIpOnLaunch" },
         "Tags": [
           {
             "Key": "Name",
-            "Value": {
-              "Fn::Sub": "${AWS::StackName} - Public Subnet 3"
-            }
+            "Value": { "Fn::Sub": "${AWS::StackName} - Public Subnet 3" }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "PublicSubnet3RouteTable": {
@@ -392,32 +299,22 @@
             }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "PublicSubnet3RouteTableAssociation": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
-        "RouteTableId": {
-          "Ref": "PublicSubnet3RouteTable"
-        },
-        "SubnetId": {
-          "Ref": "PublicSubnet3"
-        }
+        "RouteTableId": { "Ref": "PublicSubnet3RouteTable" },
+        "SubnetId": { "Ref": "PublicSubnet3" }
       }
     },
     "PublicSubnet3InternetGatewayRoute": {
       "Type": "AWS::EC2::Route",
       "Properties": {
-        "RouteTableId": {
-          "Ref": "PublicSubnet3RouteTable"
-        },
+        "RouteTableId": { "Ref": "PublicSubnet3RouteTable" },
         "DestinationCidrBlock": "0.0.0.0/0",
-        "GatewayId": {
-          "Ref": "InternetGateway"
-        }
+        "GatewayId": { "Ref": "InternetGateway" }
       }
     },
     "PrivateSubnet1": {
@@ -426,20 +323,14 @@
         "AvailabilityZone": {
           "Fn::Select": ["0", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
-        "CidrBlock": {
-          "Ref": "PrivateSubnet1CidrBlock"
-        },
+        "CidrBlock": { "Ref": "PrivateSubnet1CidrBlock" },
         "Tags": [
           {
             "Key": "Name",
-            "Value": {
-              "Fn::Sub": "${AWS::StackName} - Private Subnet 1"
-            }
+            "Value": { "Fn::Sub": "${AWS::StackName} - Private Subnet 1" }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "PrivateSubnet1RouteTable": {
@@ -453,20 +344,14 @@
             }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "PrivateSubnet1RouteTableAssociation": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
-        "RouteTableId": {
-          "Ref": "PrivateSubnet1RouteTable"
-        },
-        "SubnetId": {
-          "Ref": "PrivateSubnet1"
-        }
+        "RouteTableId": { "Ref": "PrivateSubnet1RouteTable" },
+        "SubnetId": { "Ref": "PrivateSubnet1" }
       }
     },
     "PrivateSubnet2": {
@@ -475,20 +360,14 @@
         "AvailabilityZone": {
           "Fn::Select": ["1", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
-        "CidrBlock": {
-          "Ref": "PrivateSubnet2CidrBlock"
-        },
+        "CidrBlock": { "Ref": "PrivateSubnet2CidrBlock" },
         "Tags": [
           {
             "Key": "Name",
-            "Value": {
-              "Fn::Sub": "${AWS::StackName} - Private Subnet 2"
-            }
+            "Value": { "Fn::Sub": "${AWS::StackName} - Private Subnet 2" }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "PrivateSubnet2RouteTable": {
@@ -502,20 +381,14 @@
             }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "PrivateSubnet2RouteTableAssociation": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
-        "RouteTableId": {
-          "Ref": "PrivateSubnet2RouteTable"
-        },
-        "SubnetId": {
-          "Ref": "PrivateSubnet2"
-        }
+        "RouteTableId": { "Ref": "PrivateSubnet2RouteTable" },
+        "SubnetId": { "Ref": "PrivateSubnet2" }
       }
     },
     "PrivateSubnet3": {
@@ -524,20 +397,14 @@
         "AvailabilityZone": {
           "Fn::Select": ["2", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
-        "CidrBlock": {
-          "Ref": "PrivateSubnet3CidrBlock"
-        },
+        "CidrBlock": { "Ref": "PrivateSubnet3CidrBlock" },
         "Tags": [
           {
             "Key": "Name",
-            "Value": {
-              "Fn::Sub": "${AWS::StackName} - Private Subnet 3"
-            }
+            "Value": { "Fn::Sub": "${AWS::StackName} - Private Subnet 3" }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "PrivateSubnet3RouteTable": {
@@ -551,20 +418,14 @@
             }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "PrivateSubnet3RouteTableAssociation": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
-        "RouteTableId": {
-          "Ref": "PrivateSubnet3RouteTable"
-        },
-        "SubnetId": {
-          "Ref": "PrivateSubnet3"
-        }
+        "RouteTableId": { "Ref": "PrivateSubnet3RouteTable" },
+        "SubnetId": { "Ref": "PrivateSubnet3" }
       }
     },
     "NatGateway1ElasticIp": {
@@ -588,9 +449,7 @@
         "AllocationId": {
           "Fn::GetAtt": ["NatGateway1ElasticIp", "AllocationId"]
         },
-        "SubnetId": {
-          "Ref": "PublicSubnet1"
-        },
+        "SubnetId": { "Ref": "PublicSubnet1" },
         "Tags": [
           {
             "Key": "Name",
@@ -605,13 +464,9 @@
       "Type": "AWS::EC2::Route",
       "Condition": "CreateNatGateway",
       "Properties": {
-        "RouteTableId": {
-          "Ref": "PrivateSubnet1RouteTable"
-        },
+        "RouteTableId": { "Ref": "PrivateSubnet1RouteTable" },
         "DestinationCidrBlock": "0.0.0.0/0",
-        "NatGatewayId": {
-          "Ref": "NatGateway1"
-        }
+        "NatGatewayId": { "Ref": "NatGateway1" }
       }
     },
     "NatGateway2ElasticIp": {
@@ -635,9 +490,7 @@
         "AllocationId": {
           "Fn::GetAtt": ["NatGateway2ElasticIp", "AllocationId"]
         },
-        "SubnetId": {
-          "Ref": "PublicSubnet2"
-        },
+        "SubnetId": { "Ref": "PublicSubnet2" },
         "Tags": [
           {
             "Key": "Name",
@@ -652,13 +505,9 @@
       "Type": "AWS::EC2::Route",
       "Condition": "CreateNatGateway",
       "Properties": {
-        "RouteTableId": {
-          "Ref": "PrivateSubnet2RouteTable"
-        },
+        "RouteTableId": { "Ref": "PrivateSubnet2RouteTable" },
         "DestinationCidrBlock": "0.0.0.0/0",
-        "NatGatewayId": {
-          "Ref": "NatGateway2"
-        }
+        "NatGatewayId": { "Ref": "NatGateway2" }
       }
     },
     "NatGateway3ElasticIp": {
@@ -682,9 +531,7 @@
         "AllocationId": {
           "Fn::GetAtt": ["NatGateway3ElasticIp", "AllocationId"]
         },
-        "SubnetId": {
-          "Ref": "PublicSubnet3"
-        },
+        "SubnetId": { "Ref": "PublicSubnet3" },
         "Tags": [
           {
             "Key": "Name",
@@ -699,13 +546,9 @@
       "Type": "AWS::EC2::Route",
       "Condition": "CreateNatGateway",
       "Properties": {
-        "RouteTableId": {
-          "Ref": "PrivateSubnet3RouteTable"
-        },
+        "RouteTableId": { "Ref": "PrivateSubnet3RouteTable" },
         "DestinationCidrBlock": "0.0.0.0/0",
-        "NatGatewayId": {
-          "Ref": "NatGateway3"
-        }
+        "NatGatewayId": { "Ref": "NatGateway3" }
       }
     },
     "DataSubnet1": {
@@ -715,20 +558,14 @@
         "AvailabilityZone": {
           "Fn::Select": ["0", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
-        "CidrBlock": {
-          "Ref": "DataSubnet1CidrBlock"
-        },
+        "CidrBlock": { "Ref": "DataSubnet1CidrBlock" },
         "Tags": [
           {
             "Key": "Name",
-            "Value": {
-              "Fn::Sub": "${AWS::StackName} - Data Subnet 1"
-            }
+            "Value": { "Fn::Sub": "${AWS::StackName} - Data Subnet 1" }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "DataSubnet1RouteTable": {
@@ -743,21 +580,15 @@
             }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "DataSubnet1RouteTableAssociation": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Condition": "CreateDataSubnet",
       "Properties": {
-        "RouteTableId": {
-          "Ref": "DataSubnet1RouteTable"
-        },
-        "SubnetId": {
-          "Ref": "DataSubnet1"
-        }
+        "RouteTableId": { "Ref": "DataSubnet1RouteTable" },
+        "SubnetId": { "Ref": "DataSubnet1" }
       }
     },
     "DataSubnet2": {
@@ -767,20 +598,14 @@
         "AvailabilityZone": {
           "Fn::Select": ["1", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
-        "CidrBlock": {
-          "Ref": "DataSubnet2CidrBlock"
-        },
+        "CidrBlock": { "Ref": "DataSubnet2CidrBlock" },
         "Tags": [
           {
             "Key": "Name",
-            "Value": {
-              "Fn::Sub": "${AWS::StackName} - Data Subnet 2"
-            }
+            "Value": { "Fn::Sub": "${AWS::StackName} - Data Subnet 2" }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "DataSubnet2RouteTable": {
@@ -795,21 +620,15 @@
             }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "DataSubnet2RouteTableAssociation": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Condition": "CreateDataSubnet",
       "Properties": {
-        "RouteTableId": {
-          "Ref": "DataSubnet2RouteTable"
-        },
-        "SubnetId": {
-          "Ref": "DataSubnet2"
-        }
+        "RouteTableId": { "Ref": "DataSubnet2RouteTable" },
+        "SubnetId": { "Ref": "DataSubnet2" }
       }
     },
     "DataSubnet3": {
@@ -819,20 +638,14 @@
         "AvailabilityZone": {
           "Fn::Select": ["2", { "Fn::GetAZs": { "Ref": "AWS::Region" } }]
         },
-        "CidrBlock": {
-          "Ref": "DataSubnet3CidrBlock"
-        },
+        "CidrBlock": { "Ref": "DataSubnet3CidrBlock" },
         "Tags": [
           {
             "Key": "Name",
-            "Value": {
-              "Fn::Sub": "${AWS::StackName} - Data Subnet 3"
-            }
+            "Value": { "Fn::Sub": "${AWS::StackName} - Data Subnet 3" }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "DataSubnet3RouteTable": {
@@ -847,21 +660,15 @@
             }
           }
         ],
-        "VpcId": {
-          "Ref": "Vpc"
-        }
+        "VpcId": { "Ref": "Vpc" }
       }
     },
     "DataSubnet3RouteTableAssociation": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Condition": "CreateDataSubnet",
       "Properties": {
-        "RouteTableId": {
-          "Ref": "DataSubnet3RouteTable"
-        },
-        "SubnetId": {
-          "Ref": "DataSubnet3"
-        }
+        "RouteTableId": { "Ref": "DataSubnet3RouteTable" },
+        "SubnetId": { "Ref": "DataSubnet3" }
       }
     },
     "PublicSubnetsNetworkAcl": {
@@ -881,9 +688,7 @@
     "PublicSubnetsNetworkAclInboundRule": {
       "Type": "AWS::EC2::NetworkAclEntry",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "PublicSubnetsNetworkAcl"
-        },
+        "NetworkAclId": { "Ref": "PublicSubnetsNetworkAcl" },
         "CidrBlock": "0.0.0.0/0",
         "Protocol": -1,
         "RuleAction": "allow",
@@ -893,9 +698,7 @@
     "PublicSubnetsNetworkAclOutboundRule": {
       "Type": "AWS::EC2::NetworkAclEntry",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "PublicSubnetsNetworkAcl"
-        },
+        "NetworkAclId": { "Ref": "PublicSubnetsNetworkAcl" },
         "CidrBlock": "0.0.0.0/0",
         "Egress": true,
         "Protocol": -1,
@@ -941,17 +744,9 @@
     "PrivateSubnetsNetworkAclInboundRule": {
       "Type": "AWS::EC2::NetworkAclEntry",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "PrivateSubnetsNetworkAcl"
-        },
+        "NetworkAclId": { "Ref": "PrivateSubnetsNetworkAcl" },
         "CidrBlock": {
-          "Fn::If": [
-            "CreateNatGateway",
-            "0.0.0.0/0",
-            {
-              "Ref": "VpcCidrBlock"
-            }
-          ]
+          "Fn::If": ["CreateNatGateway", "0.0.0.0/0", { "Ref": "VpcCidrBlock" }]
         },
         "Protocol": -1,
         "RuleAction": "allow",
@@ -961,17 +756,9 @@
     "PrivateSubnetsNetworkAclOutboundRule": {
       "Type": "AWS::EC2::NetworkAclEntry",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "PrivateSubnetsNetworkAcl"
-        },
+        "NetworkAclId": { "Ref": "PrivateSubnetsNetworkAcl" },
         "CidrBlock": {
-          "Fn::If": [
-            "CreateNatGateway",
-            "0.0.0.0/0",
-            {
-              "Ref": "VpcCidrBlock"
-            }
-          ]
+          "Fn::If": ["CreateNatGateway", "0.0.0.0/0", { "Ref": "VpcCidrBlock" }]
         },
         "Egress": true,
         "Protocol": -1,
@@ -1019,12 +806,8 @@
       "Type": "AWS::EC2::NetworkAclEntry",
       "Condition": "CreateDataSubnet",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "DataSubnetsNetworkAcl"
-        },
-        "CidrBlock": {
-          "Ref": "PrivateSubnet1CidrBlock"
-        },
+        "NetworkAclId": { "Ref": "DataSubnetsNetworkAcl" },
+        "CidrBlock": { "Ref": "PrivateSubnet1CidrBlock" },
         "Protocol": -1,
         "RuleAction": "allow",
         "RuleNumber": 95
@@ -1034,12 +817,8 @@
       "Type": "AWS::EC2::NetworkAclEntry",
       "Condition": "CreateDataSubnet",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "DataSubnetsNetworkAcl"
-        },
-        "CidrBlock": {
-          "Ref": "PrivateSubnet2CidrBlock"
-        },
+        "NetworkAclId": { "Ref": "DataSubnetsNetworkAcl" },
+        "CidrBlock": { "Ref": "PrivateSubnet2CidrBlock" },
         "Protocol": -1,
         "RuleAction": "allow",
         "RuleNumber": 96
@@ -1049,12 +828,8 @@
       "Type": "AWS::EC2::NetworkAclEntry",
       "Condition": "CreateDataSubnet",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "DataSubnetsNetworkAcl"
-        },
-        "CidrBlock": {
-          "Ref": "PrivateSubnet3CidrBlock"
-        },
+        "NetworkAclId": { "Ref": "DataSubnetsNetworkAcl" },
+        "CidrBlock": { "Ref": "PrivateSubnet3CidrBlock" },
         "Protocol": -1,
         "RuleAction": "allow",
         "RuleNumber": 97
@@ -1064,12 +839,8 @@
       "Type": "AWS::EC2::NetworkAclEntry",
       "Condition": "CreateDataSubnet",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "DataSubnetsNetworkAcl"
-        },
-        "CidrBlock": {
-          "Ref": "DataSubnet1CidrBlock"
-        },
+        "NetworkAclId": { "Ref": "DataSubnetsNetworkAcl" },
+        "CidrBlock": { "Ref": "DataSubnet1CidrBlock" },
         "Protocol": -1,
         "RuleAction": "allow",
         "RuleNumber": 98
@@ -1079,12 +850,8 @@
       "Type": "AWS::EC2::NetworkAclEntry",
       "Condition": "CreateDataSubnet",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "DataSubnetsNetworkAcl"
-        },
-        "CidrBlock": {
-          "Ref": "DataSubnet2CidrBlock"
-        },
+        "NetworkAclId": { "Ref": "DataSubnetsNetworkAcl" },
+        "CidrBlock": { "Ref": "DataSubnet2CidrBlock" },
         "Protocol": -1,
         "RuleAction": "allow",
         "RuleNumber": 99
@@ -1094,12 +861,8 @@
       "Type": "AWS::EC2::NetworkAclEntry",
       "Condition": "CreateDataSubnet",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "DataSubnetsNetworkAcl"
-        },
-        "CidrBlock": {
-          "Ref": "DataSubnet3CidrBlock"
-        },
+        "NetworkAclId": { "Ref": "DataSubnetsNetworkAcl" },
+        "CidrBlock": { "Ref": "DataSubnet3CidrBlock" },
         "Protocol": -1,
         "RuleAction": "allow",
         "RuleNumber": 100
@@ -1109,12 +872,8 @@
       "Type": "AWS::EC2::NetworkAclEntry",
       "Condition": "CreateDataSubnet",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "DataSubnetsNetworkAcl"
-        },
-        "CidrBlock": {
-          "Ref": "PrivateSubnet1CidrBlock"
-        },
+        "NetworkAclId": { "Ref": "DataSubnetsNetworkAcl" },
+        "CidrBlock": { "Ref": "PrivateSubnet1CidrBlock" },
         "Egress": true,
         "Protocol": -1,
         "RuleAction": "allow",
@@ -1125,12 +884,8 @@
       "Type": "AWS::EC2::NetworkAclEntry",
       "Condition": "CreateDataSubnet",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "DataSubnetsNetworkAcl"
-        },
-        "CidrBlock": {
-          "Ref": "PrivateSubnet2CidrBlock"
-        },
+        "NetworkAclId": { "Ref": "DataSubnetsNetworkAcl" },
+        "CidrBlock": { "Ref": "PrivateSubnet2CidrBlock" },
         "Egress": true,
         "Protocol": -1,
         "RuleAction": "allow",
@@ -1141,12 +896,8 @@
       "Type": "AWS::EC2::NetworkAclEntry",
       "Condition": "CreateDataSubnet",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "DataSubnetsNetworkAcl"
-        },
-        "CidrBlock": {
-          "Ref": "PrivateSubnet3CidrBlock"
-        },
+        "NetworkAclId": { "Ref": "DataSubnetsNetworkAcl" },
+        "CidrBlock": { "Ref": "PrivateSubnet3CidrBlock" },
         "Egress": true,
         "Protocol": -1,
         "RuleAction": "allow",
@@ -1157,12 +908,8 @@
       "Type": "AWS::EC2::NetworkAclEntry",
       "Condition": "CreateDataSubnet",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "DataSubnetsNetworkAcl"
-        },
-        "CidrBlock": {
-          "Ref": "DataSubnet1CidrBlock"
-        },
+        "NetworkAclId": { "Ref": "DataSubnetsNetworkAcl" },
+        "CidrBlock": { "Ref": "DataSubnet1CidrBlock" },
         "Egress": true,
         "Protocol": -1,
         "RuleAction": "allow",
@@ -1173,12 +920,8 @@
       "Type": "AWS::EC2::NetworkAclEntry",
       "Condition": "CreateDataSubnet",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "DataSubnetsNetworkAcl"
-        },
-        "CidrBlock": {
-          "Ref": "DataSubnet2CidrBlock"
-        },
+        "NetworkAclId": { "Ref": "DataSubnetsNetworkAcl" },
+        "CidrBlock": { "Ref": "DataSubnet2CidrBlock" },
         "Egress": true,
         "Protocol": -1,
         "RuleAction": "allow",
@@ -1189,12 +932,8 @@
       "Type": "AWS::EC2::NetworkAclEntry",
       "Condition": "CreateDataSubnet",
       "Properties": {
-        "NetworkAclId": {
-          "Ref": "DataSubnetsNetworkAcl"
-        },
-        "CidrBlock": {
-          "Ref": "DataSubnet3CidrBlock"
-        },
+        "NetworkAclId": { "Ref": "DataSubnetsNetworkAcl" },
+        "CidrBlock": { "Ref": "DataSubnet3CidrBlock" },
         "Egress": true,
         "Protocol": -1,
         "RuleAction": "allow",
@@ -1229,228 +968,126 @@
   "Outputs": {
     "Vpc": {
       "Description": "The resource ID of the VPC.",
-      "Value": {
-        "Ref": "Vpc"
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-Vpc"
-        }
-      }
+      "Value": { "Ref": "Vpc" },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-Vpc" } }
     },
     "VpcCidrBlock": {
       "Description": "The IPv4 CIDR block of the VPC.",
-      "Value": {
-        "Ref": "VpcCidrBlock"
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-VpcCidrBlock"
-        }
-      }
+      "Value": { "Ref": "VpcCidrBlock" },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-VpcCidrBlock" } }
     },
     "PublicSubnet1": {
       "Description": "The resource ID of Public Subnet 1.",
-      "Value": {
-        "Ref": "PublicSubnet1"
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-PublicSubnet1"
-        }
-      }
+      "Value": { "Ref": "PublicSubnet1" },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-PublicSubnet1" } }
     },
     "PublicSubnet2": {
       "Description": "The resource ID of Public Subnet 2.",
-      "Value": {
-        "Ref": "PublicSubnet2"
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-PublicSubnet2"
-        }
-      }
+      "Value": { "Ref": "PublicSubnet2" },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-PublicSubnet2" } }
     },
     "PublicSubnet3": {
       "Description": "The resource ID of Public Subnet 3.",
-      "Value": {
-        "Ref": "PublicSubnet3"
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-PublicSubnet3"
-        }
-      }
+      "Value": { "Ref": "PublicSubnet3" },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-PublicSubnet3" } }
     },
     "PublicSubnet1CidrBlock": {
       "Description": "The IPv4 CIDR block of Public Subnet 1.",
-      "Value": {
-        "Ref": "PublicSubnet1CidrBlock"
-      },
+      "Value": { "Ref": "PublicSubnet1CidrBlock" },
       "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-PublicSubnet1CidrBlock"
-        }
+        "Name": { "Fn::Sub": "${AWS::StackName}-PublicSubnet1CidrBlock" }
       }
     },
     "PublicSubnet2CidrBlock": {
       "Description": "The IPv4 CIDR block of Public Subnet 2.",
-      "Value": {
-        "Ref": "PublicSubnet2CidrBlock"
-      },
+      "Value": { "Ref": "PublicSubnet2CidrBlock" },
       "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-PublicSubnet2CidrBlock"
-        }
+        "Name": { "Fn::Sub": "${AWS::StackName}-PublicSubnet2CidrBlock" }
       }
     },
     "PublicSubnet3CidrBlock": {
       "Description": "The IPv4 CIDR block of Public Subnet 3.",
-      "Value": {
-        "Ref": "PublicSubnet3CidrBlock"
-      },
+      "Value": { "Ref": "PublicSubnet3CidrBlock" },
       "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-PublicSubnet3CidrBlock"
-        }
+        "Name": { "Fn::Sub": "${AWS::StackName}-PublicSubnet3CidrBlock" }
       }
     },
     "PrivateSubnet1": {
       "Description": "The resource ID of Private Subnet 1.",
-      "Value": {
-        "Ref": "PrivateSubnet1"
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-PrivateSubnet1"
-        }
-      }
+      "Value": { "Ref": "PrivateSubnet1" },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-PrivateSubnet1" } }
     },
     "PrivateSubnet2": {
       "Description": "The resource ID of Private Subnet 2.",
-      "Value": {
-        "Ref": "PrivateSubnet2"
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-PrivateSubnet2"
-        }
-      }
+      "Value": { "Ref": "PrivateSubnet2" },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-PrivateSubnet2" } }
     },
     "PrivateSubnet3": {
       "Description": "The resource ID of Private Subnet 3.",
-      "Value": {
-        "Ref": "PrivateSubnet3"
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-PrivateSubnet3"
-        }
-      }
+      "Value": { "Ref": "PrivateSubnet3" },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-PrivateSubnet3" } }
     },
     "PrivateSubnet1CidrBlock": {
       "Description": "The IPv4 CIDR block of Private Subnet 1.",
-      "Value": {
-        "Ref": "PrivateSubnet1CidrBlock"
-      },
+      "Value": { "Ref": "PrivateSubnet1CidrBlock" },
       "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-PrivateSubnet1CidrBlock"
-        }
+        "Name": { "Fn::Sub": "${AWS::StackName}-PrivateSubnet1CidrBlock" }
       }
     },
     "PrivateSubnet2CidrBlock": {
       "Description": "The IPv4 CIDR block of Private Subnet 2.",
-      "Value": {
-        "Ref": "PrivateSubnet2CidrBlock"
-      },
+      "Value": { "Ref": "PrivateSubnet2CidrBlock" },
       "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-PrivateSubnet2CidrBlock"
-        }
+        "Name": { "Fn::Sub": "${AWS::StackName}-PrivateSubnet2CidrBlock" }
       }
     },
     "PrivateSubnet3CidrBlock": {
       "Description": "The IPv4 CIDR block of Private Subnet 3.",
-      "Value": {
-        "Ref": "PrivateSubnet3CidrBlock"
-      },
+      "Value": { "Ref": "PrivateSubnet3CidrBlock" },
       "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-PrivateSubnet3CidrBlock"
-        }
+        "Name": { "Fn::Sub": "${AWS::StackName}-PrivateSubnet3CidrBlock" }
       }
     },
     "DataSubnet1": {
       "Condition": "CreateDataSubnet",
       "Description": "The resource ID of Data Subnet 1.",
-      "Value": {
-        "Ref": "DataSubnet1"
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-DataSubnet1"
-        }
-      }
+      "Value": { "Ref": "DataSubnet1" },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-DataSubnet1" } }
     },
     "DataSubnet2": {
       "Condition": "CreateDataSubnet",
       "Description": "The resource ID of Data Subnet 2.",
-      "Value": {
-        "Ref": "DataSubnet2"
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-DataSubnet2"
-        }
-      }
+      "Value": { "Ref": "DataSubnet2" },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-DataSubnet2" } }
     },
     "DataSubnet3": {
       "Condition": "CreateDataSubnet",
       "Description": "The resource ID of Data Subnet 3.",
-      "Value": {
-        "Ref": "DataSubnet3"
-      },
-      "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-DataSubnet3"
-        }
-      }
+      "Value": { "Ref": "DataSubnet3" },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-DataSubnet3" } }
     },
     "DataSubnet1CidrBlock": {
       "Condition": "CreateDataSubnet",
       "Description": "The IPv4 CIDR block of Data Subnet 1.",
-      "Value": {
-        "Ref": "DataSubnet1CidrBlock"
-      },
+      "Value": { "Ref": "DataSubnet1CidrBlock" },
       "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-DataSubnet1CidrBlock"
-        }
+        "Name": { "Fn::Sub": "${AWS::StackName}-DataSubnet1CidrBlock" }
       }
     },
     "DataSubnet2CidrBlock": {
       "Condition": "CreateDataSubnet",
       "Description": "The IPv4 CIDR block of Data Subnet 2.",
-      "Value": {
-        "Ref": "DataSubnet2CidrBlock"
-      },
+      "Value": { "Ref": "DataSubnet2CidrBlock" },
       "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-DataSubnet2CidrBlock"
-        }
+        "Name": { "Fn::Sub": "${AWS::StackName}-DataSubnet2CidrBlock" }
       }
     },
     "DataSubnet3CidrBlock": {
       "Condition": "CreateDataSubnet",
       "Description": "The IPv4 CIDR block of Data Subnet 3.",
-      "Value": {
-        "Ref": "DataSubnet3CidrBlock"
-      },
+      "Value": { "Ref": "DataSubnet3CidrBlock" },
       "Export": {
-        "Name": {
-          "Fn::Sub": "${AWS::StackName}-DataSubnet3CidrBlock"
-        }
+        "Name": { "Fn::Sub": "${AWS::StackName}-DataSubnet3CidrBlock" }
       }
     }
   }
