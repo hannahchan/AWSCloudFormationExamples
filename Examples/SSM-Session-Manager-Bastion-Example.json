@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "A Systems Manager managed Amazon Linux bastion with its own Security Group.",
+  "Description": "An Amazon Linux bastion accessible via Systems Manager Session Manager.",
   "Metadata": {
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [
@@ -93,17 +93,37 @@
                 {
                   "Effect": "Allow",
                   "Action": [
-                    "ssm:UpdateInstanceInformation",
                     "ssmmessages:CreateControlChannel",
                     "ssmmessages:CreateDataChannel",
                     "ssmmessages:OpenControlChannel",
-                    "ssmmessages:OpenDataChannel"
+                    "ssmmessages:OpenDataChannel",
+                    "ssm:UpdateInstanceInformation"
                   ],
                   "Resource": "*"
                 },
                 {
                   "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents",
+                    "logs:DescribeLogGroups",
+                    "logs:DescribeLogStreams"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": ["s3:PutObject"],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
                   "Action": ["s3:GetEncryptionConfiguration"],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": "kms:GenerateDataKey",
                   "Resource": "*"
                 }
               ]
