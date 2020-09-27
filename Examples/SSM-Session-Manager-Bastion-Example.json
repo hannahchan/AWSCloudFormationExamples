@@ -6,7 +6,7 @@
       "ParameterGroups": [
         {
           "Label": { "default": "Bastion Configuration" },
-          "Parameters": ["InstanceType", "KeyName"]
+          "Parameters": ["ImageId", "InstanceType", "KeyName"]
         },
         {
           "Label": { "default": "Network Configuration" },
@@ -14,6 +14,7 @@
         }
       ],
       "ParameterLabels": {
+        "ImageId": { "default": "Image ID" },
         "InstanceType": { "default": "Instance Type" },
         "KeyName": { "default": "Key Name" },
         "VpcId": { "default": "VPC" },
@@ -23,6 +24,11 @@
     }
   },
   "Parameters": {
+    "ImageId": {
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+      "Default": "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2",
+      "Description": "The SSM parameter containing the Amazon Machine Image (AMI) to use for the bastion."
+    },
     "InstanceType": {
       "Type": "String",
       "Default": "t3.micro",
@@ -164,7 +170,7 @@
       "Type": "AWS::EC2::Instance",
       "Properties": {
         "IamInstanceProfile": { "Ref": "InstanceProfile" },
-        "ImageId": "ami-0f96495a064477ffb",
+        "ImageId": { "Ref": "ImageId" },
         "InstanceType": { "Ref": "InstanceType" },
         "KeyName": { "Ref": "KeyName" },
         "SecurityGroupIds": [{ "Ref": "SecurityGroup" }],
