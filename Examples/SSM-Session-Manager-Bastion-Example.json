@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "An Amazon Linux bastion accessible via Systems Manager Session Manager.",
+  "Description": "An Amazon Linux 2 bastion accessible via Systems Manager Session Manager.",
   "Metadata": {
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [
