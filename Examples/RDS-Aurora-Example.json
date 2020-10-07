@@ -13,7 +13,7 @@
           "Parameters": [
             "Engine",
             "DBInstanceClass",
-            "IncludeReplicas",
+            "IncludeReplica",
             "DeletionProtection"
           ]
         },
@@ -51,7 +51,7 @@
         "SubnetIds": { "default": "Subnet IDs" },
         "Engine": { "default": "Database Engine" },
         "DBInstanceClass": { "default": "Database Instance Class" },
-        "IncludeReplicas": { "default": "Include Replicas" },
+        "IncludeReplica": { "default": "Include Replica" },
         "DeletionProtection": { "default": "Deletion Protection" },
         "StorageEncrypted": { "default": "Storage Encrypted" },
         "KmsKeyId": { "default": "KMS Key" },
@@ -115,11 +115,11 @@
       ],
       "Description": "The database instance class to be used for the database instances."
     },
-    "IncludeReplicas": {
+    "IncludeReplica": {
       "Type": "String",
       "Default": false,
       "AllowedValues": [true, false],
-      "Description": "Creates database replicas if set to 'true'."
+      "Description": "Creates database a replica if set to 'true'."
     },
     "DeletionProtection": {
       "Type": "String",
@@ -219,7 +219,7 @@
     }
   },
   "Conditions": {
-    "CreateReplicas": { "Fn::Equals": [{ "Ref": "IncludeReplicas" }, true] },
+    "CreateReplica": { "Fn::Equals": [{ "Ref": "IncludeReplica" }, true] },
     "EnableEnhancedMonitoring": {
       "Fn::Not": [{ "Fn::Equals": [{ "Ref": "MonitoringInterval" }, 0] }]
     },
@@ -351,7 +351,7 @@
         "VpcSecurityGroupIds": [{ "Ref": "SecurityGroup" }]
       }
     },
-    "DBInstance1": {
+    "PrimaryDBInstance": {
       "Type": "AWS::RDS::DBInstance",
       "Properties": {
         "AutoMinorVersionUpgrade": { "Ref": "AutoMinorVersionUpgrade" },
@@ -396,55 +396,9 @@
         }
       }
     },
-    "DBInstance2": {
+    "ReplicaDBInstance": {
       "Type": "AWS::RDS::DBInstance",
-      "Condition": "CreateReplicas",
-      "Properties": {
-        "AutoMinorVersionUpgrade": { "Ref": "AutoMinorVersionUpgrade" },
-        "DBClusterIdentifier": { "Ref": "DBCluster" },
-        "DBInstanceClass": { "Ref": "DBInstanceClass" },
-        "DBParameterGroupName": {
-          "Fn::If": [
-            "UseDefaultDBParameterGroupName",
-            {
-              "Fn::FindInMap": [
-                "Engine",
-                { "Ref": "Engine" },
-                "DefaultDBParameterGroupName"
-              ]
-            },
-            { "Ref": "DBParameterGroupName" }
-          ]
-        },
-        "Engine": { "Ref": "Engine" },
-        "EnablePerformanceInsights": { "Ref": "EnablePerformanceInsights" },
-        "MonitoringInterval": { "Ref": "MonitoringInterval" },
-        "MonitoringRoleArn": {
-          "Fn::If": [
-            "EnableEnhancedMonitoring",
-            { "Fn::GetAtt": ["EnhancedMonitoringRole", "Arn"] },
-            { "Ref": "AWS::NoValue" }
-          ]
-        },
-        "PerformanceInsightsKMSKeyId": {
-          "Fn::If": [
-            "UseKmsKeyForPerformanceInsights",
-            { "Ref": "PerformanceInsightsKMSKeyId" },
-            { "Ref": "AWS::NoValue" }
-          ]
-        },
-        "PerformanceInsightsRetentionPeriod": {
-          "Fn::If": [
-            "UsePerformanceInsightsRetentionPeriod",
-            { "Ref": "PerformanceInsightsRetentionPeriod" },
-            { "Ref": "AWS::NoValue" }
-          ]
-        }
-      }
-    },
-    "DBInstance3": {
-      "Type": "AWS::RDS::DBInstance",
-      "Condition": "CreateReplicas",
+      "Condition": "CreateReplica",
       "Properties": {
         "AutoMinorVersionUpgrade": { "Ref": "AutoMinorVersionUpgrade" },
         "DBClusterIdentifier": { "Ref": "DBCluster" },
