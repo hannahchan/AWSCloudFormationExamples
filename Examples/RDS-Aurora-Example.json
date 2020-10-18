@@ -47,18 +47,18 @@
         }
       ],
       "ParameterLabels": {
-        "Vpc": { "default": "VPC" },
-        "SubnetIds": { "default": "Subnet IDs" },
+        "MasterUsername": { "default": "Master Username" },
+        "MasterUserPassword": { "default": "Master User Password" },
         "Engine": { "default": "Database Engine" },
         "DBInstanceClass": { "default": "Database Instance Class" },
         "IncludeReplica": { "default": "Include Replica" },
         "DeletionProtection": { "default": "Deletion Protection" },
-        "StorageEncrypted": { "default": "Storage Encrypted" },
-        "KmsKeyId": { "default": "KMS Key" },
-        "MasterUsername": { "default": "Master Username" },
-        "MasterUserPassword": { "default": "Master User Password" },
+        "Vpc": { "default": "VPC" },
+        "SubnetIds": { "default": "Subnet IDs" },
         "AutoMinorVersionUpgrade": { "default": "Auto Minor Version Upgrade" },
         "BackupRetentionPeriod": { "default": "Backup Retention Period" },
+        "StorageEncrypted": { "default": "Storage Encrypted" },
+        "KmsKeyId": { "default": "KMS Key" },
         "MonitoringInterval": { "default": "Enhanced Monitoring Interval" },
         "EnablePerformanceInsights": {
           "default": "Enable Performance Insights"

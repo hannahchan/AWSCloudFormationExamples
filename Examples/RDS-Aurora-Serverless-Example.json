@@ -1,0 +1,221 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "An Aurora serverless database cluster.",
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": { "default": "Credentials" },
+          "Parameters": ["MasterUsername", "MasterUserPassword"]
+        },
+        {
+          "Label": { "default": "Cluster Configuration" },
+          "Parameters": ["Engine", "DeletionProtection"]
+        },
+        {
+          "Label": { "default": "Network Connectivity" },
+          "Parameters": ["Vpc", "SubnetIds"]
+        },
+        {
+          "Label": { "default": "Maintenance and Backup" },
+          "Parameters": ["BackupRetentionPeriod"]
+        },
+        { "Label": { "default": "Encryption" }, "Parameters": ["KmsKeyId"] },
+        {
+          "Label": { "default": "Parameter Groups" },
+          "Parameters": ["DBClusterParameterGroupName"]
+        }
+      ],
+      "ParameterLabels": {
+        "MasterUsername": { "default": "Master Username" },
+        "MasterUserPassword": { "default": "Master User Password" },
+        "Engine": { "default": "Database Engine" },
+        "DeletionProtection": { "default": "Deletion Protection" },
+        "Vpc": { "default": "VPC" },
+        "SubnetIds": { "default": "Subnet IDs" },
+        "BackupRetentionPeriod": { "default": "Backup Retention Period" },
+        "KmsKeyId": { "default": "KMS Key" },
+        "DBClusterParameterGroupName": {
+          "default": "Database Cluster Parameter Group Name"
+        }
+      }
+    }
+  },
+  "Parameters": {
+    "MasterUsername": {
+      "Type": "String",
+      "Default": "",
+      "Description": "The username for the master user of the database cluster."
+    },
+    "MasterUserPassword": {
+      "Type": "String",
+      "NoEcho": true,
+      "Description": "The password for the master user of the database cluster."
+    },
+    "Engine": {
+      "Type": "String",
+      "Default": "aurora",
+      "AllowedValues": ["aurora", "aurora-mysql", "aurora-postgresql"],
+      "Description": "The database engine to be used for the database cluster."
+    },
+    "DeletionProtection": {
+      "Type": "String",
+      "Default": false,
+      "AllowedValues": [true, false],
+      "Description": "Enables deletion protection if set to 'true'."
+    },
+    "Vpc": {
+      "Type": "AWS::EC2::VPC::Id",
+      "Description": "The VPC to create the database in."
+    },
+    "SubnetIds": {
+      "Type": "List<AWS::EC2::Subnet::Id>",
+      "Description": "The list of subnets to create database instances in."
+    },
+    "BackupRetentionPeriod": {
+      "Type": "Number",
+      "Default": 7,
+      "MinValue": 1,
+      "MaxValue": 35,
+      "Description": "The number of days for which automated backups are retained."
+    },
+    "KmsKeyId": {
+      "Type": "String",
+      "Default": "",
+      "Description": "The ARN of the KMS key to use for the encryption of the cluster. Leave blank to use the default KMS key."
+    },
+    "DBClusterParameterGroupName": {
+      "Type": "String",
+      "Default": "",
+      "Description": "The name of the database cluster parameter group to associate with this database cluster. Leave blank to use default."
+    }
+  },
+  "Mappings": {
+    "Engine": {
+      "aurora": {
+        "DefaultDBClusterParameterGroupName": "default.aurora5.6",
+        "DefaultDBParameterGroupName": "default.aurora5.6",
+        "DefaultMasterUsername": "root",
+        "Family": "aurora5.6",
+        "Port": 3306
+      },
+      "aurora-mysql": {
+        "DefaultDBClusterParameterGroupName": "default.aurora-mysql5.7",
+        "DefaultDBParameterGroupName": "default.aurora-mysql5.7",
+        "DefaultMasterUsername": "root",
+        "Family": "aurora-mysql5.7",
+        "Port": 3306
+      },
+      "aurora-postgresql": {
+        "DefaultDBClusterParameterGroupName": "default.aurora-postgresql10",
+        "DefaultDBParameterGroupName": "default.aurora-postgresql10",
+        "DefaultMasterUsername": "postgres",
+        "Family": "aurora-postgresql10",
+        "Port": 5432
+      }
+    }
+  },
+  "Conditions": {
+    "UseDefaultDBClusterParameterGroupName": {
+      "Fn::Equals": [{ "Ref": "DBClusterParameterGroupName" }, ""]
+    },
+    "UseDefaultMasterUsername": {
+      "Fn::Equals": [{ "Ref": "MasterUsername" }, ""]
+    },
+    "UseKmsKey": { "Fn::Not": [{ "Fn::Equals": [{ "Ref": "KmsKeyId" }, ""] }] }
+  },
+  "Resources": {
+    "SecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": {
+          "Fn::Sub": "Controls access to Aurora serverless database - ${AWS::StackName}"
+        },
+        "GroupName": {
+          "Fn::Sub": "${AWS::StackName} - Database Security Group"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${AWS::StackName} - Database Security Group"
+            }
+          }
+        ],
+        "VpcId": { "Ref": "Vpc" }
+      }
+    },
+    "DBSubnetGroup": {
+      "Type": "AWS::RDS::DBSubnetGroup",
+      "Properties": {
+        "DBSubnetGroupDescription": {
+          "Fn::Sub": "Database Subnets for Aurora serverless database - ${AWS::StackName}"
+        },
+        "SubnetIds": { "Ref": "SubnetIds" }
+      }
+    },
+    "DBCluster": {
+      "Type": "AWS::RDS::DBCluster",
+      "Properties": {
+        "BackupRetentionPeriod": { "Ref": "BackupRetentionPeriod" },
+        "DBClusterParameterGroupName": {
+          "Fn::If": [
+            "UseDefaultDBClusterParameterGroupName",
+            {
+              "Fn::FindInMap": [
+                "Engine",
+                { "Ref": "Engine" },
+                "DefaultDBClusterParameterGroupName"
+              ]
+            },
+            { "Ref": "DBClusterParameterGroupName" }
+          ]
+        },
+        "DBSubnetGroupName": { "Ref": "DBSubnetGroup" },
+        "DeletionProtection": { "Ref": "DeletionProtection" },
+        "Engine": { "Ref": "Engine" },
+        "EngineMode": "serverless",
+        "KmsKeyId": {
+          "Fn::If": [
+            "UseKmsKey",
+            { "Ref": "KmsKeyId" },
+            { "Ref": "AWS::NoValue" }
+          ]
+        },
+        "MasterUsername": {
+          "Fn::If": [
+            "UseDefaultMasterUsername",
+            {
+              "Fn::FindInMap": [
+                "Engine",
+                { "Ref": "Engine" },
+                "DefaultMasterUsername"
+              ]
+            },
+            { "Ref": "MasterUsername" }
+          ]
+        },
+        "MasterUserPassword": { "Ref": "MasterUserPassword" },
+        "StorageEncrypted": true,
+        "VpcSecurityGroupIds": [{ "Ref": "SecurityGroup" }]
+      }
+    }
+  },
+  "Outputs": {
+    "SecurityGroup": {
+      "Description": "The resource ID of the database Security Group.",
+      "Value": { "Ref": "SecurityGroup" },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-SecurityGroup" } }
+    },
+    "ClusterEndpoint": {
+      "Description": "The read/write endpoint for the database cluster.",
+      "Value": { "Fn::GetAtt": ["DBCluster", "Endpoint.Address"] },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-DBClusterEndpoint" } }
+    },
+    "ClusterPort": {
+      "Description": "The port used for the database cluster.",
+      "Value": { "Fn::GetAtt": ["DBCluster", "Endpoint.Port"] },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-DBClusterPort" } }
+    }
+  }
+}
