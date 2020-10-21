@@ -10,7 +10,14 @@
         },
         {
           "Label": { "default": "Cluster Configuration" },
-          "Parameters": ["Engine", "DeletionProtection"]
+          "Parameters": [
+            "Engine",
+            "DeletionProtection",
+            "MinCapacity",
+            "MaxCapacity",
+            "AutoPause",
+            "SecondsUntilAutoPause"
+          ]
         },
         {
           "Label": { "default": "Network Connectivity" },
@@ -31,6 +38,10 @@
         "MasterUserPassword": { "default": "Master User Password" },
         "Engine": { "default": "Database Engine" },
         "DeletionProtection": { "default": "Deletion Protection" },
+        "MinCapacity": { "default": "Minimum Aurora Capacity Unit" },
+        "MaxCapacity": { "default": "Maximum Aurora Capacity Unit" },
+        "AutoPause": { "default": "Auto Pause" },
+        "SecondsUntilAutoPause": { "default": "Auto Pause Seconds" },
         "Vpc": { "default": "VPC" },
         "SubnetIds": { "default": "Subnet IDs" },
         "EnableHttpEndpoint": { "default": "Enable HTTP Endpoint (Data API)" },
@@ -64,6 +75,31 @@
       "Default": false,
       "AllowedValues": [true, false],
       "Description": "Enables deletion protection if set to 'true'."
+    },
+    "MinCapacity": {
+      "Type": "Number",
+      "Default": 2,
+      "AllowedValues": [1, 2, 4, 8, 16, 32, 64, 128, 192, 256, 384],
+      "Description": "The minimum Aurora capacity unit for the serverless database cluster."
+    },
+    "MaxCapacity": {
+      "Type": "Number",
+      "Default": 16,
+      "AllowedValues": [1, 2, 4, 8, 16, 32, 64, 128, 192, 256, 384],
+      "Description": "The maximum Aurora capacity unit for the serverless database cluster."
+    },
+    "AutoPause": {
+      "Type": "String",
+      "Default": true,
+      "AllowedValues": [true, false],
+      "Description": "Allows the compute capacity of the database to be paused (scale to zero) if set to 'true'."
+    },
+    "SecondsUntilAutoPause": {
+      "Type": "Number",
+      "Default": 300,
+      "MinValue": 300,
+      "MaxValue": 86400,
+      "Description": "The amount of time in seconds of database inactivity before compute capacity is paused."
     },
     "Vpc": {
       "Type": "AWS::EC2::VPC::Id",
@@ -204,6 +240,12 @@
           ]
         },
         "MasterUserPassword": { "Ref": "MasterUserPassword" },
+        "ScalingConfiguration": {
+          "AutoPause": { "Ref": "AutoPause" },
+          "MaxCapacity": { "Ref": "MaxCapacity" },
+          "MinCapacity": { "Ref": "MinCapacity" },
+          "SecondsUntilAutoPause": { "Ref": "SecondsUntilAutoPause" }
+        },
         "StorageEncrypted": true,
         "VpcSecurityGroupIds": [{ "Ref": "SecurityGroup" }]
       }
