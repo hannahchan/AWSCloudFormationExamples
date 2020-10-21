@@ -14,7 +14,7 @@
         },
         {
           "Label": { "default": "Network Connectivity" },
-          "Parameters": ["Vpc", "SubnetIds"]
+          "Parameters": ["Vpc", "SubnetIds", "EnableHttpEndpoint"]
         },
         {
           "Label": { "default": "Maintenance and Backup" },
@@ -33,6 +33,7 @@
         "DeletionProtection": { "default": "Deletion Protection" },
         "Vpc": { "default": "VPC" },
         "SubnetIds": { "default": "Subnet IDs" },
+        "EnableHttpEndpoint": { "default": "Enable HTTP Endpoint (Data API)" },
         "BackupRetentionPeriod": { "default": "Backup Retention Period" },
         "KmsKeyId": { "default": "KMS Key" },
         "DBClusterParameterGroupName": {
@@ -45,18 +46,18 @@
     "MasterUsername": {
       "Type": "String",
       "Default": "",
-      "Description": "The username for the master user of the database cluster."
+      "Description": "The username for the master user of the serverless database cluster."
     },
     "MasterUserPassword": {
       "Type": "String",
       "NoEcho": true,
-      "Description": "The password for the master user of the database cluster."
+      "Description": "The password for the master user of the serverless database cluster."
     },
     "Engine": {
       "Type": "String",
       "Default": "aurora",
       "AllowedValues": ["aurora", "aurora-mysql", "aurora-postgresql"],
-      "Description": "The database engine to be used for the database cluster."
+      "Description": "The database engine to be used for the serverless database cluster."
     },
     "DeletionProtection": {
       "Type": "String",
@@ -66,11 +67,17 @@
     },
     "Vpc": {
       "Type": "AWS::EC2::VPC::Id",
-      "Description": "The VPC to create the database in."
+      "Description": "The VPC to create the serverless database in."
     },
     "SubnetIds": {
       "Type": "List<AWS::EC2::Subnet::Id>",
-      "Description": "The list of subnets to create database instances in."
+      "Description": "The list of subnets to create the serverless database endpoints in."
+    },
+    "EnableHttpEndpoint": {
+      "Type": "String",
+      "Default": false,
+      "AllowedValues": [true, false],
+      "Description": "Enables a HTTP endpoint for the serverless database if set to 'true'."
     },
     "BackupRetentionPeriod": {
       "Type": "Number",
@@ -173,6 +180,7 @@
         },
         "DBSubnetGroupName": { "Ref": "DBSubnetGroup" },
         "DeletionProtection": { "Ref": "DeletionProtection" },
+        "EnableHttpEndpoint": { "Ref": "EnableHttpEndpoint" },
         "Engine": { "Ref": "Engine" },
         "EngineMode": "serverless",
         "KmsKeyId": {
