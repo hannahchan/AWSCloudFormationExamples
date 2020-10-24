@@ -11,6 +11,10 @@
         {
           "Label": { "default": "Network Configuration" },
           "Parameters": ["VpcId", "SubnetId", "IncludeElasticIp"]
+        },
+        {
+          "Label": { "default": "Access Configuration" },
+          "Parameters": ["TargetSecurityGroup"]
         }
       ],
       "ParameterLabels": {
@@ -19,7 +23,8 @@
         "KeyName": { "default": "Key Name" },
         "VpcId": { "default": "VPC" },
         "SubnetId": { "default": "Subnet" },
-        "IncludeElasticIp": { "default": "Include Elastic IP" }
+        "IncludeElasticIp": { "default": "Include Elastic IP" },
+        "TargetSecurityGroup": { "default": "Target Security Group" }
       }
     }
   },
@@ -67,6 +72,10 @@
       "AllowedValues": [true, false],
       "Default": false,
       "Description": "Assigns an Elastic IP to the bastion if set to 'true'."
+    },
+    "TargetSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup::Id",
+      "Description": "The security group containing the resources you want to access from the bastion."
     }
   },
   "Mappings": {},
@@ -190,6 +199,17 @@
           "Fn::GetAtt": ["EC2InstanceElasticIp", "AllocationId"]
         },
         "InstanceId": { "Ref": "EC2Instance" }
+      }
+    },
+    "TargetSecurityGroupIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "Description": {
+          "Fn::Sub": "Allows access from - ${AWS::StackName} - Bastion Security Group"
+        },
+        "GroupId": { "Ref": "TargetSecurityGroup" },
+        "IpProtocol": "-1",
+        "SourceSecurityGroupId": { "Ref": "SecurityGroup" }
       }
     }
   },
