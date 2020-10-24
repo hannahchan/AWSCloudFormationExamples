@@ -299,6 +299,11 @@
       "Value": { "Ref": "SecurityGroup" },
       "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-SecurityGroup" } }
     },
+    "Secret": {
+      "Description": "The ARN of the serverless database secret.",
+      "Value": { "Ref": "Secret" },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-Secret" } }
+    },
     "ClusterEndpoint": {
       "Description": "The read/write endpoint for the serverless database cluster.",
       "Value": { "Fn::GetAtt": ["DBCluster", "Endpoint.Address"] },
