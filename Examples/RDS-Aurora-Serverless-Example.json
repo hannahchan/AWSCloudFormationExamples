@@ -5,10 +5,6 @@
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [
         {
-          "Label": { "default": "Credentials" },
-          "Parameters": ["MasterUsername", "MasterUserPassword"]
-        },
-        {
           "Label": { "default": "Cluster Configuration" },
           "Parameters": [
             "Engine",
@@ -24,6 +20,10 @@
           "Parameters": ["Vpc", "SubnetIds", "EnableHttpEndpoint"]
         },
         {
+          "Label": { "default": "Credentials" },
+          "Parameters": ["MasterUsername", "SecretsManagerKmsKeyId"]
+        },
+        {
           "Label": { "default": "Maintenance and Backup" },
           "Parameters": ["BackupRetentionPeriod"]
         },
@@ -34,8 +34,6 @@
         }
       ],
       "ParameterLabels": {
-        "MasterUsername": { "default": "Master Username" },
-        "MasterUserPassword": { "default": "Master User Password" },
         "Engine": { "default": "Database Engine" },
         "DeletionProtection": { "default": "Deletion Protection" },
         "MinCapacity": { "default": "Minimum Aurora Capacity Unit" },
@@ -45,6 +43,8 @@
         "Vpc": { "default": "VPC" },
         "SubnetIds": { "default": "Subnet IDs" },
         "EnableHttpEndpoint": { "default": "Enable HTTP Endpoint (Data API)" },
+        "MasterUsername": { "default": "Master Username" },
+        "SecretsManagerKmsKeyId": { "default": "Secrets Manager KMS Key" },
         "BackupRetentionPeriod": { "default": "Backup Retention Period" },
         "KmsKeyId": { "default": "KMS Key" },
         "DBClusterParameterGroupName": {
@@ -54,16 +54,6 @@
     }
   },
   "Parameters": {
-    "MasterUsername": {
-      "Type": "String",
-      "Default": "",
-      "Description": "The username for the master user of the serverless database cluster."
-    },
-    "MasterUserPassword": {
-      "Type": "String",
-      "NoEcho": true,
-      "Description": "The password for the master user of the serverless database cluster."
-    },
     "Engine": {
       "Type": "String",
       "Default": "aurora",
@@ -115,6 +105,16 @@
       "AllowedValues": [true, false],
       "Description": "Enables a HTTP endpoint for the serverless database if set to 'true'."
     },
+    "MasterUsername": {
+      "Type": "String",
+      "Default": "",
+      "Description": "The username for the master user of the serverless database cluster. Leave blank to use default."
+    },
+    "SecretsManagerKmsKeyId": {
+      "Type": "String",
+      "Default": "",
+      "Description": "The ARN of the KMS key to use for the encryption of the generated serverless database secret. Leave blank to use the default KMS key."
+    },
     "BackupRetentionPeriod": {
       "Type": "Number",
       "Default": 7,
@@ -130,7 +130,7 @@
     "DBClusterParameterGroupName": {
       "Type": "String",
       "Default": "",
-      "Description": "The name of the database cluster parameter group to associate with this database cluster. Leave blank to use default."
+      "Description": "The name of the database cluster parameter group to associate with this server database cluster. Leave blank to use default."
     }
   },
   "Mappings": {
@@ -165,7 +165,10 @@
     "UseDefaultMasterUsername": {
       "Fn::Equals": [{ "Ref": "MasterUsername" }, ""]
     },
-    "UseKmsKey": { "Fn::Not": [{ "Fn::Equals": [{ "Ref": "KmsKeyId" }, ""] }] }
+    "UseKmsKey": { "Fn::Not": [{ "Fn::Equals": [{ "Ref": "KmsKeyId" }, ""] }] },
+    "UseKmsKeyForSecretsManager": {
+      "Fn::Not": [{ "Fn::Equals": [{ "Ref": "SecretsManagerKmsKeyId" }, ""] }]
+    }
   },
   "Resources": {
     "SecurityGroup": {
@@ -195,6 +198,45 @@
           "Fn::Sub": "Database Subnets for Aurora serverless database - ${AWS::StackName}"
         },
         "SubnetIds": { "Ref": "SubnetIds" }
+      }
+    },
+    "Secret": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": { "Fn::Sub": "${AWS::StackName} - Database Secret" },
+        "GenerateSecretString": {
+          "ExcludeCharacters": "/@\"",
+          "GenerateStringKey": "password",
+          "PasswordLength": 16,
+          "SecretStringTemplate": {
+            "Fn::Sub": [
+              "{\"username\":\"${username}\"}",
+              {
+                "username": {
+                  "Fn::If": [
+                    "UseDefaultMasterUsername",
+                    {
+                      "Fn::FindInMap": [
+                        "Engine",
+                        { "Ref": "Engine" },
+                        "DefaultMasterUsername"
+                      ]
+                    },
+                    { "Ref": "MasterUsername" }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "KmsKeyId": {
+          "Fn::If": [
+            "UseKmsKeyForSecretsManager",
+            { "Ref": "SecretsManagerKmsKeyId" },
+            { "Ref": "AWS::NoValue" }
+          ]
+        },
+        "Name": { "Fn::Sub": "${AWS::StackName}-DatabaseSecret" }
       }
     },
     "DBCluster": {
@@ -227,19 +269,11 @@
           ]
         },
         "MasterUsername": {
-          "Fn::If": [
-            "UseDefaultMasterUsername",
-            {
-              "Fn::FindInMap": [
-                "Engine",
-                { "Ref": "Engine" },
-                "DefaultMasterUsername"
-              ]
-            },
-            { "Ref": "MasterUsername" }
-          ]
+          "Fn::Sub": "{{resolve:secretsmanager:${Secret}:SecretString:username}}"
         },
-        "MasterUserPassword": { "Ref": "MasterUserPassword" },
+        "MasterUserPassword": {
+          "Fn::Sub": "{{resolve:secretsmanager:${Secret}:SecretString:password}}"
+        },
         "ScalingConfiguration": {
           "AutoPause": { "Ref": "AutoPause" },
           "MaxCapacity": { "Ref": "MaxCapacity" },
@@ -248,6 +282,14 @@
         },
         "StorageEncrypted": true,
         "VpcSecurityGroupIds": [{ "Ref": "SecurityGroup" }]
+      }
+    },
+    "SecretTargetAttachment": {
+      "Type": "AWS::SecretsManager::SecretTargetAttachment",
+      "Properties": {
+        "SecretId": { "Ref": "Secret" },
+        "TargetId": { "Ref": "DBCluster" },
+        "TargetType": "AWS::RDS::DBCluster"
       }
     }
   },
