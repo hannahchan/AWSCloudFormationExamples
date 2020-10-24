@@ -253,17 +253,17 @@
   },
   "Outputs": {
     "SecurityGroup": {
-      "Description": "The resource ID of the database Security Group.",
+      "Description": "The resource ID of the serverless database Security Group.",
       "Value": { "Ref": "SecurityGroup" },
       "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-SecurityGroup" } }
     },
     "ClusterEndpoint": {
-      "Description": "The read/write endpoint for the database cluster.",
+      "Description": "The read/write endpoint for the serverless database cluster.",
       "Value": { "Fn::GetAtt": ["DBCluster", "Endpoint.Address"] },
       "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-DBClusterEndpoint" } }
     },
     "ClusterPort": {
-      "Description": "The port used for the database cluster.",
+      "Description": "The port used for the serverless database cluster.",
       "Value": { "Fn::GetAtt": ["DBCluster", "Endpoint.Port"] },
       "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-DBClusterPort" } }
     }
