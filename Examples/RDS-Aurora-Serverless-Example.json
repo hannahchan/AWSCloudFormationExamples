@@ -203,7 +203,9 @@
     "Secret": {
       "Type": "AWS::SecretsManager::Secret",
       "Properties": {
-        "Description": { "Fn::Sub": "${AWS::StackName} - Database Secret" },
+        "Description": {
+          "Fn::Sub": "${AWS::StackName} - Master User Database Credentials"
+        },
         "GenerateSecretString": {
           "ExcludeCharacters": "/@\"",
           "GenerateStringKey": "password",
@@ -236,7 +238,7 @@
             { "Ref": "AWS::NoValue" }
           ]
         },
-        "Name": { "Fn::Sub": "${AWS::StackName}-DatabaseSecret" }
+        "Name": { "Fn::Sub": "${AWS::StackName}-MasterUser" }
       }
     },
     "DBCluster": {
@@ -300,7 +302,7 @@
       "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-SecurityGroup" } }
     },
     "Secret": {
-      "Description": "The ARN of the serverless database secret.",
+      "Description": "The ARN of the secret containing the master user credentials for the serverless database cluster.",
       "Value": { "Ref": "Secret" },
       "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-Secret" } }
     },
