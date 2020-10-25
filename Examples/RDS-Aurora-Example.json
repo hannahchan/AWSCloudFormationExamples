@@ -5,10 +5,6 @@
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [
         {
-          "Label": { "default": "Credentials" },
-          "Parameters": ["MasterUsername", "MasterUserPassword"]
-        },
-        {
           "Label": { "default": "Cluster Configuration" },
           "Parameters": [
             "Engine",
@@ -20,6 +16,10 @@
         {
           "Label": { "default": "Network Connectivity" },
           "Parameters": ["Vpc", "SubnetIds"]
+        },
+        {
+          "Label": { "default": "Credentials" },
+          "Parameters": ["MasterUsername", "SecretsManagerKmsKeyId"]
         },
         {
           "Label": { "default": "Maintenance and Backup" },
@@ -47,14 +47,14 @@
         }
       ],
       "ParameterLabels": {
-        "MasterUsername": { "default": "Master Username" },
-        "MasterUserPassword": { "default": "Master User Password" },
         "Engine": { "default": "Database Engine" },
         "DBInstanceClass": { "default": "Database Instance Class" },
         "IncludeReplica": { "default": "Include Replica" },
         "DeletionProtection": { "default": "Deletion Protection" },
         "Vpc": { "default": "VPC" },
         "SubnetIds": { "default": "Subnet IDs" },
+        "MasterUsername": { "default": "Master Username" },
+        "SecretsManagerKmsKeyId": { "default": "Secrets Manager KMS Key" },
         "AutoMinorVersionUpgrade": { "default": "Auto Minor Version Upgrade" },
         "BackupRetentionPeriod": { "default": "Backup Retention Period" },
         "StorageEncrypted": { "default": "Storage Encrypted" },
@@ -77,16 +77,6 @@
     }
   },
   "Parameters": {
-    "MasterUsername": {
-      "Type": "String",
-      "Default": "",
-      "Description": "The username for the master user of the database cluster."
-    },
-    "MasterUserPassword": {
-      "Type": "String",
-      "NoEcho": true,
-      "Description": "The password for the master user of the database cluster."
-    },
     "Engine": {
       "Type": "String",
       "Default": "aurora",
@@ -134,6 +124,16 @@
     "SubnetIds": {
       "Type": "List<AWS::EC2::Subnet::Id>",
       "Description": "The list of subnets to create database instances in."
+    },
+    "MasterUsername": {
+      "Type": "String",
+      "Default": "",
+      "Description": "The username for the master user of the database cluster. Leave blank to use default."
+    },
+    "SecretsManagerKmsKeyId": {
+      "Type": "String",
+      "Default": "",
+      "Description": "The ARN of the KMS key to use for the encryption of the generated database secret. Leave blank to use the default KMS key."
     },
     "AutoMinorVersionUpgrade": {
       "Type": "String",
@@ -238,6 +238,9 @@
         { "Fn::Not": [{ "Fn::Equals": [{ "Ref": "KmsKeyId" }, ""] }] }
       ]
     },
+    "UseKmsKeyForSecretsManager": {
+      "Fn::Not": [{ "Fn::Equals": [{ "Ref": "SecretsManagerKmsKeyId" }, ""] }]
+    },
     "UseKmsKeyForPerformanceInsights": {
       "Fn::And": [
         { "Fn::Equals": [{ "Ref": "EnablePerformanceInsights" }, true] },
@@ -305,6 +308,45 @@
         ]
       }
     },
+    "Secret": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "Description": { "Fn::Sub": "${AWS::StackName} - Database Secret" },
+        "GenerateSecretString": {
+          "ExcludeCharacters": "/@\"",
+          "GenerateStringKey": "password",
+          "PasswordLength": 16,
+          "SecretStringTemplate": {
+            "Fn::Sub": [
+              "{\"username\":\"${username}\"}",
+              {
+                "username": {
+                  "Fn::If": [
+                    "UseDefaultMasterUsername",
+                    {
+                      "Fn::FindInMap": [
+                        "Engine",
+                        { "Ref": "Engine" },
+                        "DefaultMasterUsername"
+                      ]
+                    },
+                    { "Ref": "MasterUsername" }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "KmsKeyId": {
+          "Fn::If": [
+            "UseKmsKeyForSecretsManager",
+            { "Ref": "SecretsManagerKmsKeyId" },
+            { "Ref": "AWS::NoValue" }
+          ]
+        },
+        "Name": { "Fn::Sub": "${AWS::StackName}-DatabaseSecret" }
+      }
+    },
     "DBCluster": {
       "Type": "AWS::RDS::DBCluster",
       "Properties": {
@@ -333,19 +375,11 @@
           ]
         },
         "MasterUsername": {
-          "Fn::If": [
-            "UseDefaultMasterUsername",
-            {
-              "Fn::FindInMap": [
-                "Engine",
-                { "Ref": "Engine" },
-                "DefaultMasterUsername"
-              ]
-            },
-            { "Ref": "MasterUsername" }
-          ]
+          "Fn::Sub": "{{resolve:secretsmanager:${Secret}:SecretString:username}}"
         },
-        "MasterUserPassword": { "Ref": "MasterUserPassword" },
+        "MasterUserPassword": {
+          "Fn::Sub": "{{resolve:secretsmanager:${Secret}:SecretString:password}}"
+        },
         "Port": { "Fn::FindInMap": ["Engine", { "Ref": "Engine" }, "Port"] },
         "StorageEncrypted": { "Ref": "StorageEncrypted" },
         "VpcSecurityGroupIds": [{ "Ref": "SecurityGroup" }]
@@ -441,6 +475,14 @@
           ]
         }
       }
+    },
+    "SecretTargetAttachment": {
+      "Type": "AWS::SecretsManager::SecretTargetAttachment",
+      "Properties": {
+        "SecretId": { "Ref": "Secret" },
+        "TargetId": { "Ref": "DBCluster" },
+        "TargetType": "AWS::RDS::DBCluster"
+      }
     }
   },
   "Outputs": {
@@ -448,6 +490,11 @@
       "Description": "The resource ID of the database Security Group.",
       "Value": { "Ref": "SecurityGroup" },
       "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-SecurityGroup" } }
+    },
+    "Secret": {
+      "Description": "The ARN of the database secret.",
+      "Value": { "Ref": "Secret" },
+      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-Secret" } }
     },
     "ClusterEndpoint": {
       "Description": "The read/write endpoint for the database cluster.",

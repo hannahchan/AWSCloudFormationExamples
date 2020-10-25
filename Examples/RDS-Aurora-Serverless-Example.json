@@ -130,7 +130,7 @@
     "DBClusterParameterGroupName": {
       "Type": "String",
       "Default": "",
-      "Description": "The name of the database cluster parameter group to associate with this server database cluster. Leave blank to use default."
+      "Description": "The name of the database cluster parameter group to associate with this serverless database cluster. Leave blank to use default."
     }
   },
   "Mappings": {
