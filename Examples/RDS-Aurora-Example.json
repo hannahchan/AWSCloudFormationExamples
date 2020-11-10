@@ -315,7 +315,7 @@
           "Fn::Sub": "${AWS::StackName} - Master User Database Credentials"
         },
         "GenerateSecretString": {
-          "ExcludeCharacters": "/@\"",
+          "ExcludeCharacters": "/@\"'\\",
           "GenerateStringKey": "password",
           "PasswordLength": 16,
           "SecretStringTemplate": {
