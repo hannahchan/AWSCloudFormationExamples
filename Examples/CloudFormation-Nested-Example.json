@@ -1,0 +1,41 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "A VPC and Aurora database.",
+  "Metadata": {},
+  "Parameters": {},
+  "Conditions": {},
+  "Resources": {
+    "Vpc": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "Parameters": {
+          "MapPublicIpOnLaunch": false,
+          "IncludeNat": false,
+          "IncludeDataSubnets": true
+        },
+        "TemplateURL": "./VPC-Public-Private-Subnet-Examples/VPC-Triple-AZ-Public-Private-Subnet-Example.json"
+      }
+    },
+    "Db": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "Parameters": {
+          "Engine": "aurora-postgresql",
+          "Vpc": { "Fn::GetAtt": ["Vpc", "Outputs.Vpc"] },
+          "SubnetIds": {
+            "Fn::Join": [
+              ",",
+              [
+                { "Fn::GetAtt": ["Vpc", "Outputs.DataSubnet1"] },
+                { "Fn::GetAtt": ["Vpc", "Outputs.DataSubnet2"] },
+                { "Fn::GetAtt": ["Vpc", "Outputs.DataSubnet3"] }
+              ]
+            ]
+          }
+        },
+        "TemplateURL": "./RDS-Aurora-Examples/RDS-Aurora-Example.json"
+      }
+    }
+  },
+  "Outputs": {}
+}
