@@ -205,7 +205,7 @@
       "Type": "AWS::EC2::SecurityGroupIngress",
       "Properties": {
         "Description": {
-          "Fn::Sub": "Allows access from - ${AWS::StackName} - Bastion Security Group"
+          "Fn::Sub": "Allows full access from - ${AWS::StackName} - Bastion Security Group"
         },
         "GroupId": { "Ref": "TargetSecurityGroup" },
         "IpProtocol": "-1",
