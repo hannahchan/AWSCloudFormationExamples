@@ -203,7 +203,7 @@
             "Fn::GetAtt": ["Db", "Outputs.SecurityGroup"]
           }
         },
-        "TemplateURL": "./SSM-Session-Manager-Bastion-Example.json"
+        "TemplateURL": "./Bastion-Examples/SSM-Session-Manager-Bastion-Example.json"
       }
     },
     "SsmEndpoint": {
