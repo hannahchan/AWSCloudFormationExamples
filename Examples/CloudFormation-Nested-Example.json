@@ -19,7 +19,7 @@
         },
         {
           "Label": { "default": "Bastion Configuration" },
-          "Parameters": ["DeployBastion", "InstanceType", "KeyName"]
+          "Parameters": ["InstanceType", "KeyName"]
         }
       ],
       "ParameterLabels": {
@@ -29,7 +29,6 @@
         "DBInstanceClass": { "default": "Database Instance Class" },
         "IncludeReplica": { "default": "Include Replica" },
         "DeletionProtection": { "default": "Deletion Protection" },
-        "DeployBastion": { "default": "Deploy Bastion" },
         "InstanceType": { "default": "Instance Type" },
         "KeyName": { "default": "Key Name" }
       }
@@ -88,12 +87,6 @@
       "AllowedValues": [true, false],
       "Description": "Enables deletion protection if set to 'true'."
     },
-    "DeployBastion": {
-      "Type": "String",
-      "Default": false,
-      "AllowedValues": [true, false],
-      "Description": "Deploys an Amazon Linux 2 bastion accessible via Systems Manager Session Manager if set to 'true'."
-    },
     "InstanceType": {
       "Type": "String",
       "Default": "t3.micro",
@@ -120,9 +113,7 @@
       "Description": "The name of the Amazon EC2 Key Pair to use for the bastion."
     }
   },
-  "Conditions": {
-    "CreateBastion": { "Fn::Equals": [{ "Ref": "DeployBastion" }, true] }
-  },
+  "Conditions": {},
   "Resources": {
     "Vpc": {
       "Type": "AWS::CloudFormation::Stack",
@@ -192,23 +183,30 @@
     },
     "Bastion": {
       "Type": "AWS::CloudFormation::Stack",
-      "Condition": "CreateBastion",
       "Properties": {
         "Parameters": {
           "InstanceType": { "Ref": "InstanceType" },
           "KeyName": { "Ref": "KeyName" },
           "VpcId": { "Fn::GetAtt": ["Vpc", "Outputs.Vpc"] },
-          "SubnetId": { "Fn::GetAtt": ["Vpc", "Outputs.PrivateSubnet2"] },
+          "SubnetIds": {
+            "Fn::Join": [
+              ",",
+              [
+                { "Fn::GetAtt": ["Vpc", "Outputs.PrivateSubnet1"] },
+                { "Fn::GetAtt": ["Vpc", "Outputs.PrivateSubnet2"] },
+                { "Fn::GetAtt": ["Vpc", "Outputs.PrivateSubnet3"] }
+              ]
+            ]
+          },
           "TargetSecurityGroup": {
             "Fn::GetAtt": ["Db", "Outputs.SecurityGroup"]
           }
         },
-        "TemplateURL": "./Bastion-Examples/SSM-Session-Manager-Bastion-Example.json"
+        "TemplateURL": "./Bastion-Examples/SSM-Session-Manager-Bastion-AutoScalingGroup-Example.json"
       }
     },
     "SsmEndpoint": {
       "Type": "AWS::EC2::VPCEndpoint",
-      "Condition": "CreateBastion",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [{ "Ref": "VpcEndpointSecurityGroup" }],
@@ -224,7 +222,6 @@
     },
     "SsmMessagesEndpoint": {
       "Type": "AWS::EC2::VPCEndpoint",
-      "Condition": "CreateBastion",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [{ "Ref": "VpcEndpointSecurityGroup" }],
@@ -242,7 +239,6 @@
     },
     "Ec2MessagesEndpoint": {
       "Type": "AWS::EC2::VPCEndpoint",
-      "Condition": "CreateBastion",
       "Properties": {
         "PrivateDnsEnabled": true,
         "SecurityGroupIds": [{ "Ref": "VpcEndpointSecurityGroup" }],
